@@ -1,0 +1,53 @@
+// Components import
+@use "productList";
+@use "productGrid";
+@use "checkout";
+@use "dropdown";
+
+//Pages styles import
+@use "sell";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body{
+  margin: 0;
+  padding: 0;
+}
+
+.layout-wrapper{
+  display: flex;
+  flex-direction: row;
+}
+
+.tab-wrapper{
+  width: 100vw;
+  padding: 0 20px 0 20px !important;
+}
+
+.ant-tabs-nav{
+  margin-bottom: 25px !important;
+  position: fixed !important;
+  background-color: white !important;
+  z-index: 1 !important;
+  width: 100vw !important;
+}
+
+div[data-node-key = "1"]{
+  margin-left: 2vw !important;
+}
+
+.menu-option{
+  font-size: 1.8vh;
+}
+
+.menu-icon{
+  max-width: 60px; 
+  max-height: 60px; 
+  min-width: 40px; 
+  min-height: 40px; 
+  width: 1%; 
+  height: 10% !important; 
+  padding: 10px !important;
+}

@@ -1,0 +1,16 @@
+@media (max-width: 550px){
+    .grid-card{
+        width: 40vw !important;
+    }
+}
+
+.grid-image{
+    height: 100px;
+    object-fit: cover;
+}
+
+.grid-header{
+    display: flex; 
+    flex-direction: row;
+    justify-content: space-between;
+}

@@ -1,0 +1,47 @@
+$olive-green: #556b2f;
+$medium-olive-green: #445626;
+$dark-olive-green: #3b4b21;
+
+.checkout-wrapper{
+    position: fixed;
+    bottom: 0;
+    width: 100vw;
+    height: 85vh;
+    font-size: 1.5rem;
+    box-shadow: 0px 10px 15px -3px rgba(0,0,0,1);
+}
+
+.checkout-footer{
+    height: 12vh;
+    width: 100vw;
+    background-color: $olive-green;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.cart{
+    height: 12vh;
+    width: 100px;
+    display: flex;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 5px 30px;
+    background-color: $medium-olive-green;
+    cursor: pointer;
+
+    .icon{
+        filter: invert(100%);
+    }
+
+    &:hover{
+        background-color: $dark-olive-green;
+    }
+}
