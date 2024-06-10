@@ -5,57 +5,15 @@ import ProductGrid from "@/components/ProductGrid";
 import ProductList from "@/components/ProductList";
 import Checkout from "@/components/Checkout";
 
-const products = [
-    {
-        productId: 1,
-        name:"Latte",
-        price:60,
-        category:["Espresso","Caliente"],
-        image:"latte.png"
-    },
-    {
-        productId: 2,
-        name:"Capuccino",
-        price:55,
-        category:["Espresso","Caliente"],
-        image:"latte.png"
-    },
-    {
-        productId: 3,
-        name:"Frappe",
-        price:75,
-        category:["Espresso","Caliente"],
-        image:"latte.png"
-    },
-    {
-        productId: 4,
-        name:"Mocha",
-        price:80,
-        category:["Espresso","Caliente"],
-        image:"latte.png"
-    },
-    {
-        productId: 5,
-        name:"Caramel",
-        price:100,
-        category:["Espresso","Caliente"],
-        image:"latte.png"
-    },
-    {
-        productId: 6,
-        name:"Sunrise",
-        price:100,
-        category:["Espresso","Caliente"],
-        image:"latte.png"
-    },
-    {
-        productId: 7,
-        name:"Americano",
-        price:50,
-        category:["Espresso","Caliente"],
-        image:"latte.png"
+
+const fetchProducts = async () => {
+    const res = await fetch('/api/products');
+    if (!res.ok) {
+        throw new Error('Error fetching products');
     }
-];
+    const products = await res.json();
+    return products;
+};
 
 const categories = [
     {
@@ -79,6 +37,19 @@ const discounts = [
 ];
 
 const Sell = ()=>{
+
+    const [products, setProducts] = useState([]);
+
+    useEffect(() => {
+        const getProducts = async () => {
+            const productsFromServer = await fetchProducts();
+            setProducts(productsFromServer);
+            console.log(productsFromServer);
+        };
+
+        getProducts();
+    }, []);
+
 
     const [view, setView] = useState(false);
     const toggleView = () => setView(prev=>!prev);

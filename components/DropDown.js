@@ -28,7 +28,7 @@ const DropDown = ({cartItems, itemCount, isCollapsed, clearCart, closeDropdown})
 
         Swal.fire({
         title: 'Cobrar',
-        html: `<input type='number' id='cash-input' class='cash-input' placeholder='Ingrese dinero' />`,
+        html: `<input type='number' inputmode='numeric' pattern='[0-9]*' id='cash-input' class='cash-input' placeholder='Ingrese dinero' />`,
         showCancelButton: true,
         confirmButtonText: 'Cambio',
         showLoaderOnConfirm: true,
@@ -47,7 +47,25 @@ const DropDown = ({cartItems, itemCount, isCollapsed, clearCart, closeDropdown})
             Swal.fire({
             title: `Cambio: ${result.value}`,
             icon: 'success',
-            confirmButtonText: 'Cobrar'
+            confirmButtonText: 'Cobrar',
+            }).then((result)=>{
+                if(result.isConfirmed){
+                    Swal.fire({
+                        title: 'Compra registrada!',
+                        html: "<lord-icon\
+                            src='https://cdn.lordicon.com/mmbmokuv.json'\
+                            trigger='loop'\
+                            delay='500'\
+                            style='width:250px;height:150px'>\
+                        </lord-icon>",
+                        confirmButtonText: 'OK'
+                    }).then((result)=>{
+                        if(result.isConfirmed){
+                            clearCart();
+                        }
+                    });
+                    
+                }
             });
         }
         });
