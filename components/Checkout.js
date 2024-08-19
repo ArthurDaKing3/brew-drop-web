@@ -1,15 +1,20 @@
 import CheckoutDropDown from "./DropDown";
 
-const Checkout = ({cartItems, itemCount, price, clearCart, isDropDownCollapsed, closeDropdown})=>{
+const Checkout = ({cartItems, itemCount, price, discount, sizes, milks, clearCart, showDiscounts, isDropDownCollapsed, closeDropdown})=>{
     return(
         <div style={isDropDownCollapsed ? {height: "12vh"} : {}} className="checkout-wrapper">
             
             <CheckoutDropDown 
                 cartItems = {cartItems}
                 itemCount = {itemCount}
+                price = {price}
+                discount = {discount}
                 isCollapsed = {isDropDownCollapsed} 
                 clearCart = {clearCart}
-                closeDropdown = {closeDropdown}/>
+                showDiscounts = {showDiscounts}
+                closeDropdown = {closeDropdown}
+                sizes={sizes}
+                milks = {milks}/>
 
             <div className="checkout-footer" onClick={()=>closeDropdown(false)}>
                 <h1 className="price">${price}</h1>

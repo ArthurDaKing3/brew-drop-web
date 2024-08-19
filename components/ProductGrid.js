@@ -27,7 +27,21 @@ const ProductGrid = ({products, addItemToCart, isProduct})=>{
                             }
                             description={
                               <div>
-                                {product.category && product.category.map(c => c += " ")}
+                                {product.categories && product.categories.map((c)=>{
+                                  let category = ""
+                                  switch(c){
+                                    case "Caliente":
+                                      category = <img key={c} className="category-icon" src="./assets/bonfire.png" alt="Caliente"/>;
+                                      break;
+                                    case "Frio":
+                                      category = <img key={c} className="category-icon" src="./assets/snowflake.png" alt="Caliente"/>;
+                                      break;
+                                    default:
+                                      category = c += " ";
+                                      break;
+                                  }
+                                  return category
+                                })}
                               </div>
                             }
                              />

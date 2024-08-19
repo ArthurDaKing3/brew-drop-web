@@ -1,0 +1,28 @@
+$olive-green: #556b2f;
+$medium-olive-green: #445626;
+$dark-olive-green: #3b4b21;
+
+.options-wrapper{
+    font-size: 1.8rem;
+    width: 80%;
+}
+
+.option{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.option-icon{
+    cursor: pointer;
+    max-width: 13%;
+}
+
+.version{
+    font-size: 1.4rem;
+    position: absolute;
+    bottom: 5%;
+    left: 5%;
+    color: gray;
+}

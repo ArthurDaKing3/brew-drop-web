@@ -10,17 +10,27 @@ const SideMenu = ({isCollapsed, toggleMenu})=>{
       open={isCollapsed}
       onClose={toggleMenu}
     >
-      <ul>
+      <ul className="options-wrapper">
         <li>
-          <Link href="/sell">Vender</Link>
+          <div className="option">
+            <Link href="/sell">Vender</Link>
+            <img src="../assets/cart.png" className="option-icon" alt="Vender" />
+          </div>
         </li>
         <li>
-          <Link href="/activity">Actividad</Link>
+          <div className="option">
+            <Link href="/activity">Actividad</Link>
+            <img src="../assets/activity.png" className="option-icon" alt="Actividad" />
+          </div>
         </li>
         <li>
-          <Link href="/catalog">Catálogo</Link>
+          <div className="option">
+            <Link href="/catalog">Catálogo</Link>
+            <img src="../assets/catalog.png" className="option-icon" alt="Catálogo" />
+          </div>
         </li>
       </ul>
+      <span class="version">v0.1</span>
     </Drawer>
   );
 };

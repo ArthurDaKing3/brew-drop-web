@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Drink {
+  id         Int        @id @default(autoincrement())
+  name       String
+  image      String?
+  price      Float
+  categories Category[]
+  salesDetail SaleDetail[]
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  drinks  Drink[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SaleMaster {
+  id         Int       @id @default(autoincrement())
+  saleDetail SaleDetail[]
+  total      Float
+  payment    String @default("Efectivo")
+  discount   Discount? @relation(fields: [discountId], references: [id])
+  discountId Int?
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model SaleDetail{
+  id         Int       @id @default(autoincrement())
+  saleMaster SaleMaster @relation(fields: [saleMasterId], references: [id])
+  saleMasterId Int
+  drink Drink @relation(fields: [drinkId], references: [id])
+  drinkId Int
+  drinkType String
+  size Size @relation(fields: [sizeId], references: [id])
+  sizeId Int
+  milkType MilkType? @relation(fields: [milkTypeId], references: [id])
+  milkTypeId Int?
+  quantity Int
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model MilkType{
+  id         Int        @id @default(autoincrement())
+  name String
+  price Float 
+  sales SaleDetail[]
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Size{
+  id         Int        @id @default(autoincrement())
+  name       String
+  priceMultiplier Float
+  sales SaleDetail[]
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Discount {
+  id          Int      @id @default(autoincrement())
+  description String
+  percentage  Int
+  sales       SaleMaster[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
