@@ -63,15 +63,20 @@ const DropDown = ({cartItems, itemCount, price, discount, sizes, milks, isCollap
                 style='width:200px;height:200px'>\
             </lord-icon>\
             ",
-            
+            allowOutsideClick: false,
+            allowEscapeKey: false,
             confirmButtonText: 'Cobrar',
-            })
-            .then((result)=>{
-                if(result.isConfirmed){
-                    registerSale(price, discount);
-                    clearCart();
-                }
+            preConfirm: () => {
+                registerSale(price, discount);
+                return false; // Esto evita que se cierre la alerta
+            }
             });
+            // .then((result)=>{
+            //     if(result.isConfirmed){
+            //         registerSale(price, discount);
+            //         clearCart();
+            //     }
+            // });
         }
         });
     }
@@ -108,6 +113,8 @@ const DropDown = ({cartItems, itemCount, price, discount, sizes, milks, isCollap
                     style='width:250px;height:150px'>\
                 </lord-icon>",
                 confirmButtonText: 'OK'
+              }).then((result)=>{
+                if(result.isConfirmed) clearCart();
               })
           } catch (error) {
             Swal.fire({
@@ -116,6 +123,8 @@ const DropDown = ({cartItems, itemCount, price, discount, sizes, milks, isCollap
                 <br/> ${error}`,
                 icon: 'error',
                 confirmButtonText: 'OK'
+              }).then((result)=>{
+                if(result.isConfirmed) clearCart();
               })
               }
     }

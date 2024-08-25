@@ -23,31 +23,31 @@ export async function getStaticProps(){
         ...d,
         categories: d.categories.map(c => c.name),
         createdAt: d.createdAt.toISOString(),
-        updatedAt: d.createdAt.toISOString()
+        updatedAt: d.updatedAt ? d.updatedAt.toISOString() : ""
       }));
 
       const sCategories = categories.map(c => ({
         ...c,
         createdAt: c.createdAt.toISOString(),
-        updatedAt: c.createdAt.toISOString()
+        updatedAt: c.updatedAt ? c.updatedAt.toISOString() : ""
       }));
 
       const sDiscounts = discounts.map(d => ({
         ...d,
         createdAt: d.createdAt.toISOString(),
-        updatedAt: d.updatedAt.toISOString()
+        updatedAt: d.updatedAt ? d.updatedAt.toISOString() : ""
       }));
 
       const sSizes = sizes.map(s => ({
         ...s,
         createdAt: s.createdAt.toISOString(),
-        updatedAt: s.updatedAt.toISOString()
+        updatedAt: s.updatedAt ? s.updatedAt.toISOString() : ""
       }));
 
       const sMilkTypes = milkTypes.map(m => ({
         ...m,
         createdAt: m.createdAt.toISOString(),
-        updatedAt: m.updatedAt.toISOString()
+        updatedAt: m.updatedAt ? m.updatedAt.toISOString() : ""
       }));
 
     return({
