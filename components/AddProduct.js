@@ -1,38 +1,92 @@
-
-
 const AddProduct  = ({categories})=>{
     function chkCategory(categoryName){
-        let chk = document.getElementById(`chk_${categoryName}`) 
+        let chk = document.getElementById(`chk_${categoryName}`);
         chk.checked = !chk.checked;
+    }
+
+    function cleanForm(){
+        document.getElementById("in_name").value = "";
+        document.getElementById("in_price").value = "";
+        categories.map(c=>{
+            document.getElementById(`chk_${c.name}`).checked = false;
+        });
+        document.getElementById("collapseOne").classList.remove("show")
+        window.scrollTo(0, 0);
+    }
+
+    async function addProduct(){
+
+        const name = document.getElementById("in_name").value;
+        const price = document.getElementById("in_price").value;
+        const selectedCategories = categories.filter(c=>{
+            let chk_category = document.getElementById(`chk_${c.name}`)
+            if(chk_category.checked){
+                return parseInt(chk_category.value);
+            }
+        });
+
+        try {
+            const response = await fetch('/api/addProduct', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ name, price, selectedCategories }),
+            });
+            
+            if (response.ok) {
+                Swal.fire({
+                    title: 'Éxito',
+                    text: 'Producto registrado correctamente!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(res=>{
+                    cleanForm();
+                });
+            }else{
+                const errorDetails = await response.json();
+                throw new Error(errorDetails.message);
+            }
+      
+        }
+        catch (error) {
+            Swal.fire({
+                title: 'Error',
+                html: `No se pudo registrar la venta:\
+                <br/> ${error}`,
+                icon: 'error',
+                confirmButtonText: 'OK'
+              })
+        }
     }
     return(
         <div className="sell-wrapper form-wrapper">
             <h1 className="form-title">Agregar Producto</h1>
 
-            <form className="">
+            <div>
                 <h1 className="form-subtitle">Datos Generales</h1>
                 <div className="form-floating mb-3 mt-3">
-                    <input type="text" className="form-control" id="name" placeholder="Nombre" name="name" />
-                    <label htmlFor="name">Nombre</label>
+                    <input type="text" className="form-control" id="in_name" placeholder="Nombre" name="in_name" required/>
+                    <label htmlFor="in_name">Nombre</label>
                 </div>
                 <div className="form-floating mb-3 mt-3">
-                    <input name="price" type="number" min="1" inputMode="numeric" pattern="[0-9]*" placeholder="Precio" className="form-control" />
-                    <label htmlFor="price">Precio</label>
+                    <input id="in_price" name="in_price" type="number" min="1" inputMode="numeric" pattern="[0-9]*" placeholder="Precio" className="form-control" required/>
+                    <label htmlFor="in_price">Precio</label>
                 </div>
-                <div class="accordion" id="accordionExample">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingOne">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                <div className="accordion" id="accordionExample">
+                    <div className="accordion-item">
+                        <h2 className="accordion-header" id="headingOne">
+                        <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                             Categorias
                         </button>
                         </h2>
-                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
+                        <div id="collapseOne" className="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                            <div className="accordion-body">
                             {
                                 categories.map(c=>(
                                     <div key={c.id} className="input-group mb-3 mt-3 category-list">
                                         <span className="input-group-text">
-                                            <input id={`chk_${c.name}`} type="checkbox" name="chk" value={c.name} className="form-check-input"/>
+                                            <input id={`chk_${c.name}`} type="checkbox" name={`chk_${c.name}`} value={c.id} className="form-check-input"/>
                                         </span>
                                         <span className="form-control span-category" onClick={()=> chkCategory(c.name)}>{c.name}</span>
                                     </div>
@@ -46,10 +100,10 @@ const AddProduct  = ({categories})=>{
                 
                 <h1 className="form-subtitle mt-3">Imagen</h1>
                 <div className="form-group mb-3 mt-3">
-                    <input type="file" name="image" className="form-control"/>
+                    <input type="file" name="fl_image" id="fl_image" className="form-control"/>
                 </div>
-                <button id="btn_Add" className="btn btn-success">Agregar</button>
-            </form>
+                <button id="btn_Add" onClick={()=>addProduct()} className="btn btn-success">Agregar</button>
+            </div>
         </div>
     );
 }

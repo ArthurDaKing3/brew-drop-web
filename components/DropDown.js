@@ -68,15 +68,9 @@ const DropDown = ({cartItems, itemCount, price, discount, sizes, milks, isCollap
             confirmButtonText: 'Cobrar',
             preConfirm: () => {
                 registerSale(price, discount);
-                return false; // Esto evita que se cierre la alerta
+                return false;
             }
             });
-            // .then((result)=>{
-            //     if(result.isConfirmed){
-            //         registerSale(price, discount);
-            //         clearCart();
-            //     }
-            // });
         }
         });
     }
