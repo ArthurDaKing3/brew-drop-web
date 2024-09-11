@@ -26,11 +26,11 @@ const Layout = ({ContentProducts, ContentCategories, ContentDiscounts})=>{
             label: <div className="menu-option">Categorías</div>,
             children: ContentCategories
         },
-        {
-            key: "3",
-            label: <div className="menu-option">Descuentos</div>,
-            children: ContentDiscounts
-        }
+        // {
+        //     key: "3",
+        //     label: <div className="menu-option">Descuentos</div>,
+        //     children: ContentDiscounts
+        // }
     ];
 
     return(

@@ -64,8 +64,8 @@ export async function getStaticProps(){
 
 const Sell = ({drinks, categories, discounts, sizes, milks})=>{
 
-    const [view, setView] = useState(false);
-    const toggleView = () => setView(prev=>!prev);
+    const [isGridView, setIsGridView] = useState(false);
+    const toggleView = () => setIsGridView(prev=>!prev);
 
     const [isDropDownCollapsed, setIsDropDownCollapsed] = useState(true);
     const closeDropdown = (toggle) => {
@@ -184,7 +184,10 @@ const Sell = ({drinks, categories, discounts, sizes, milks})=>{
                         }
                     ]);
                 });
-                setPrice((prevPrice) => prevPrice + (item.price + sizes.find(s => s.id == size.value).priceMultiplier) * parseInt(qty.value));
+                const sizeMultiplier = sizes.find(s => s.id == size.value).priceMultiplier;
+                const milkMultiplier = milks.find(m => m.id == milk.value).price;
+
+                setPrice((prevPrice) => prevPrice + ((item.price + sizeMultiplier + milkMultiplier) * parseInt(qty.value)));
                 setItemCount((prevCount) => prevCount + parseInt(qty.value));
             }
         });
@@ -232,6 +235,22 @@ const Sell = ({drinks, categories, discounts, sizes, milks})=>{
   
     }
 
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [filteredBy, setFilteredBy] = useState("");
+
+    function filterProducts(filter){
+        const products = drinks.filter(p => {
+            if(p.categories.includes(filter)) return(p);
+        })
+        setFilteredBy(filter);
+        setFilteredProducts(products);
+    }
+
+    function resetFilters(){
+        setFilteredBy("");
+        setFilteredProducts([]);
+    }
+
     return(
         <div>
             <Layout 
@@ -239,11 +258,11 @@ const Sell = ({drinks, categories, discounts, sizes, milks})=>{
                     <div className="sell-wrapper">
                         <div className="sell-header">
                             <Button onClick={toggleView} className="view-button">
-                                <img src={`./assets/${view ? "grid" : "list"}.png`} className="view-img"/>
+                                <img src={`./assets/${isGridView ? "grid" : "list"}.png`} className="view-img"/>
                             </Button>
                         </div>
                         <div className="sell-body">
-                            {view ? <ProductList 
+                            {isGridView ? <ProductList 
                                     products={drinks} 
                                     addItemToCart={addItemToCart}
                                     enabled={true}
@@ -257,19 +276,44 @@ const Sell = ({drinks, categories, discounts, sizes, milks})=>{
                 }
                 ContentCategories = {
                     <div className="sell-wrapper">
-                        <div className="sell-header">
+                        <div className="sell-header header-categories">
+                            <Button onClick={resetFilters} className="view-button">
+                                <img src={`./assets/back.png`} className="view-img"/>
+                            </Button>
+                            <h1 className="filter-title">{filteredBy}</h1>
                             <Button onClick={toggleView} className="view-button">
-                                <img src={`./assets/${view ? "grid" : "list"}.png`} className="view-img"/>
+                                <img src={`./assets/${isGridView ? "grid" : "list"}.png`} className="view-img"/>
                             </Button>
                         </div>
-                        <div className="sell-body">
-                            {view ? <ProductList 
-                                    products={categories} 
+                        <div id="categories-wrapper" className="sell-body">
+                            {
+                            isGridView 
+                                ? <ProductList 
+                                    products={
+                                        filteredProducts.length == 0 
+                                            ? drinks 
+                                            : filteredProducts}
+                                    categories={categories}
+                                    addItemToCart={addItemToCart}
                                     enabled={true}
-                                    isProduct={false}/>
+                                    isProduct={
+                                        filteredProducts.length == 0 
+                                            ? false 
+                                            : true}
+                                    filterProducts={filterProducts}/>
                                 : <ProductGrid 
-                                    products={categories} 
-                                    isProduct={false}/>}
+                                    products={
+                                        filteredProducts.length == 0 
+                                            ? drinks 
+                                            : filteredProducts}
+                                    categories={categories}
+                                    addItemToCart={addItemToCart}
+                                    isProduct={
+                                        filteredProducts.length == 0 
+                                            ? false 
+                                            : true}
+                                    filterProducts={filterProducts}/>
+                            }
                         </div>
                     </div>
                 }
@@ -277,11 +321,11 @@ const Sell = ({drinks, categories, discounts, sizes, milks})=>{
                     <div className="sell-wrapper">
                         <div className="sell-header">
                             <Button onClick={toggleView} className="view-button">
-                                <img src={`./assets/${view ? "grid" : "list"}.png`} className="view-img"/>
+                                <img src={`./assets/${isGridView ? "grid" : "list"}.png`} className="view-img"/>
                             </Button>
                         </div>
                         <div className="sell-body">
-                            {view ? <ProductList 
+                            {isGridView ? <ProductList 
                                     products={discounts} 
                                     enabled={true}
                                     isProduct={false}/>

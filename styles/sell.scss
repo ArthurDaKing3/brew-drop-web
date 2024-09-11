@@ -9,7 +9,17 @@
     display: flex;
     width: 90vw;
     justify-content: flex-end;
+    align-items: center;
     margin-bottom: 20px;
+}
+
+.header-categories{
+    justify-content: space-between;
+}
+
+.filter-title{
+    font-size: 2rem;
+    font-weight: 300;
 }
 
 .view-button{
