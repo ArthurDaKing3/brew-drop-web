@@ -133,6 +133,7 @@ const DropDown = ({cartItems, itemCount, price, discount, sizes, milks, isCollap
             </div>
             <div className="dropdown-content">
                 <ProductList 
+                    isProduct={true}
                     products={cartItems} 
                     enabled={false} 
                     sizes={sizes}
