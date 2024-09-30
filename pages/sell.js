@@ -7,77 +7,135 @@ import Checkout from "@/components/Checkout";
 import { PrismaClient } from '@prisma/client'
 
 export async function getStaticProps(){
-    const prisma = new PrismaClient();
-
-    const drinks = await prisma.drink.findMany({
+    const prisma        = new PrismaClient({
+        // omit: {
+        //     category: {createdAt: true, updatedAt: true},
+        //     discount: {createdAt: true, updatedAt: true},
+        //     size: {createdAt: true, updatedAt: true},
+        //     milkType: {createdAt: true, updatedAt: true},
+        // }
+    });
+    
+    const categories    = await prisma.category.findMany();
+    const discounts     = await prisma.discount.findMany();
+    const sizes         = await prisma.size.findMany();
+    const milkTypes     = await prisma.milkType.findMany();
+    const drinks        = await prisma.drink.findMany({
         include:{
             categories : {select: {name: true}}
         }
     }); 
-    const categories = await prisma.category.findMany();
-    const discounts = await prisma.discount.findMany();
-    const sizes = await prisma.size.findMany();
-    const milkTypes = await prisma.milkType.findMany();
+    const salesMaster   = await prisma.saleMaster.findMany({
+        where:{
+            completed: false
+        },
+        include:{
+            saleDetail: {
+                select: {
+                    drinkId: true,
+                    drink: {
+                        select: {
+                            name: true,
+                            image: true,
+                            price: true,
+                            categories: {
+                                select: {
+                                    name: true
+                                }
+                            }
+                        }
+                    },
+                    drinkType: true,
+                    size: {
+                        select: {
+                            id: true,
+                            name: true,
+                            priceMultiplier: true,
+                        }
+                    },
+                    milkType: {
+                        select:{
+                            id: true,
+                            name: true,
+                            price: true,
+                        }
+                    },
+                    quantity: true
+                }
+            }
+        }
+    });
 
-    const sDrinks = drinks.map(d => ({
+    const sSalesMaster  = salesMaster.map(sm => ({
+        ...sm,
+        saleDetail: sm.saleDetail.map(sd => ({
+            ...sd,
+            size: sd.size.id,
+            milk: sd.milkType.id,
+            name: sd.drink.name,
+            image: sd.drink.image,
+            price: sd.drink.price,
+            categories: sd.drink.categories.map(c => (c.name)),
+        })),
+        createdAt: sm.createdAt.toISOString(),
+        updatedAt: sm.updatedAt ? sm.updatedAt.toISOString() : ""
+    }));
+
+    const sDrinks       = drinks.map(d => ({
         ...d,
         categories: d.categories.map(c => c.name),
         createdAt: d.createdAt.toISOString(),
         updatedAt: d.updatedAt ? d.updatedAt.toISOString() : ""
-      }));
+    }));
 
-      const sCategories = categories.map(c => ({
+    const sCategories   = categories.map(c => ({
         ...c,
         createdAt: c.createdAt.toISOString(),
         updatedAt: c.updatedAt ? c.updatedAt.toISOString() : ""
-      }));
+    }));
 
-      const sDiscounts = discounts.map(d => ({
+    const sDiscounts    = discounts.map(d => ({
         ...d,
         createdAt: d.createdAt.toISOString(),
         updatedAt: d.updatedAt ? d.updatedAt.toISOString() : ""
-      }));
+    }));
 
-      const sSizes = sizes.map(s => ({
+    const sSizes        = sizes.map(s => ({
         ...s,
         createdAt: s.createdAt.toISOString(),
         updatedAt: s.updatedAt ? s.updatedAt.toISOString() : ""
-      }));
+    }));
 
-      const sMilkTypes = milkTypes.map(m => ({
+    const sMilkTypes    = milkTypes.map(m => ({
         ...m,
         createdAt: m.createdAt.toISOString(),
         updatedAt: m.updatedAt ? m.updatedAt.toISOString() : ""
-      }));
+    }));
 
     return({
         props:{
-            drinks: sDrinks,
+            drinks:     sDrinks,
             categories: sCategories,
-            discounts: sDiscounts,
-            sizes: sSizes,
-            milks: sMilkTypes
+            discounts:  sDiscounts,
+            sizes:      sSizes,
+            milks:      sMilkTypes,
+            sales:     sSalesMaster,
         }
     })
 }
 
+const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
 
-const Sell = ({drinks, categories, discounts, sizes, milks})=>{
-
-    const [isGridView, setIsGridView] = useState(false);
-    const toggleView = () => setIsGridView(prev=>!prev);
-
+    const [isGridView, setIsGridView]                   = useState(false);
     const [isDropDownCollapsed, setIsDropDownCollapsed] = useState(true);
-    const closeDropdown = (toggle) => {
-        document.documentElement.style.overflow = toggle ? 'scroll' : 'hidden';
-        setIsDropDownCollapsed(toggle)
-    };
-
-    const [cartItems, setCartItems] = useState([]);
-    const [itemCount, setItemCount] = useState(0);
-    const [price, setPrice] = useState(0.0);
-    const [discount, setDiscount] = useState(0);
-
+    const [cartItems, setCartItems]                     = useState([]);
+    const [itemCount, setItemCount]                     = useState(0);
+    const [price, setPrice]                             = useState(0.0);
+    const [discount, setDiscount]                       = useState(0);
+    const [filteredProducts, setFilteredProducts]       = useState([]);
+    const [filteredBy, setFilteredBy]                   = useState("");
+    const [orders, setOrders]                           = useState(Array.isArray(sales) ? [...sales] : [])
+    
     let tempValue = "";
     
     useEffect(() => {
@@ -93,6 +151,21 @@ const Sell = ({drinks, categories, discounts, sizes, milks})=>{
             }
         }
     }, );
+
+    useEffect(() => {
+        // Define la función en el objeto window solo en el cliente
+        if (typeof window !== 'undefined') {
+            window.applyDiscount = function (percentage, discountId, discountName) {
+                setPrice((prevPrice) => prevPrice - Math.round(prevPrice * (percentage / 100)));
+                setDiscount(discountId);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Éxito!',
+                    text: `Descuento ${discountName} aplicado!`,
+                });
+            };
+        }
+    }, []);
     
     function addItemToCart(item){
         let categories = []
@@ -201,21 +274,6 @@ const Sell = ({drinks, categories, discounts, sizes, milks})=>{
         closeDropdown(true);
     }
 
-    useEffect(() => {
-        // Define la función en el objeto window solo en el cliente
-        if (typeof window !== 'undefined') {
-            window.applyDiscount = function (percentage, discountId, discountName) {
-                setPrice((prevPrice) => prevPrice - Math.round(prevPrice * (percentage / 100)));
-                setDiscount(discountId);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Éxito!',
-                    text: `Descuento ${discountName} aplicado!`,
-                });
-            };
-        }
-    }, []);
-
     function showDiscounts(){
         Swal.fire(
         {
@@ -235,9 +293,6 @@ const Sell = ({drinks, categories, discounts, sizes, milks})=>{
   
     }
 
-    const [filteredProducts, setFilteredProducts] = useState([]);
-    const [filteredBy, setFilteredBy] = useState("");
-
     function filterProducts(filter){
         const products = drinks.filter(p => {
             if(p.categories.includes(filter)) return(p);
@@ -249,6 +304,74 @@ const Sell = ({drinks, categories, discounts, sizes, milks})=>{
     function resetFilters(){
         setFilteredBy("");
         setFilteredProducts([]);
+    }
+
+    function closeDropdown (toggle) {
+        document.documentElement.style.overflow = toggle ? 'scroll' : 'hidden';
+        setIsDropDownCollapsed(toggle)
+    };
+
+    function toggleView() { 
+        setIsGridView(prev=>!prev)
+    }
+
+    async function completeOrder(orderId, updateOrders) {
+        try {
+            const response = await fetch('/api/completeOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ orderId }),
+            });
+    
+            if (!response.ok) {
+                const errorDetails = await response.json();
+                throw new Error(errorDetails.message);
+            }
+    
+            const { data } = await response.json();
+    
+            Swal.fire({
+                icon: 'success',
+                title: `Orden #${data.id} completada!`,
+            });
+    
+            const updatedOrders = orders.filter(order => order.id !== orderId);
+            setOrders(updatedOrders);
+
+    
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al completar la orden',
+                text: error.message,
+            });
+        }
+    }
+    
+
+    function confirmComplete(orderId){
+        const chk_order = document.getElementById(`chk_order${orderId}`);
+        
+        Swal.fire({
+            title: `Orden# ${orderId}`,
+            showCancelButton: true,
+            confirmButtonText: 'Completar',
+            cancelButtonText: 'Cancelar'
+        }).then((result)=>{
+            if(!result.isConfirmed) chk_order.checked = false;
+            else{
+                Swal.fire({
+                    title: 'Completando Orden...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+                completeOrder(orderId);
+            }
+        });
     }
 
     return(
@@ -317,22 +440,38 @@ const Sell = ({drinks, categories, discounts, sizes, milks})=>{
                         </div>
                     </div>
                 }
-                ContentDiscounts = {
+                ContentOrders = {
                     <div className="sell-wrapper">
-                        <div className="sell-header">
-                            <Button onClick={toggleView} className="view-button">
-                                <img src={`./assets/${isGridView ? "grid" : "list"}.png`} className="view-img"/>
-                            </Button>
+                        <h1>Ordenes</h1>
+                        <div className="accordion accordion-wrapper" id="accordionOrder">
+                            {
+                                orders.map(o => {
+                                    return(
+                                        <div className="accordion-item" key={o.id}>
+                                            <h2 className="accordion-header" id={`heading${o.id}`}>
+                                            <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target={`#collapse${o.id}`} aria-expanded="true" aria-controls={`collapse${o.id}`}>
+                                                Orden #{o.id}
+                                                <input id={`chk_order${o.id}`} className="chk-order" type="checkbox" onClick={()=>confirmComplete(o.id)}/>
+                                            </button>
+                                            </h2>
+                                            <div id={`collapse${o.id}`} class="accordion-collapse collapse" aria-labelledby={`heading${o.id}`} data-bs-parent="#accordionOrder">
+                                                <div className="accordion-body">
+                                                    <div className="order-wrapper">
+                                                        <ProductList 
+                                                            isProduct={true}
+                                                            products={o.saleDetail} 
+                                                            enabled={false}
+                                                            sizes={sizes}
+                                                            milks={milks}/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            }
                         </div>
-                        <div className="sell-body">
-                            {isGridView ? <ProductList 
-                                    products={discounts} 
-                                    enabled={true}
-                                    isProduct={false}/>
-                                : <ProductGrid 
-                                    products={discounts} 
-                                    isProduct={false}/>}
-                        </div>
+                       
                     </div>
                 }
             />
@@ -348,8 +487,6 @@ const Sell = ({drinks, categories, discounts, sizes, milks})=>{
                 sizes={sizes}
                 milks={milks}/>
         </div>
-
-        
     );
 }
 

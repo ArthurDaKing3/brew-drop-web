@@ -23,6 +23,10 @@
   object-fit: cover;
 }
 
+.list-category{
+  padding: 15%
+}
+
 .list-header{
   display: flex; 
   flex-direction: row; 
@@ -36,6 +40,12 @@
       margin-right: 5%;
     }
   }
+}
+
+.drinkDetails-wrapper{
+  width: 70%;
+  display: flex;
+  justify-content: space-between;
 }
 
 .icon{

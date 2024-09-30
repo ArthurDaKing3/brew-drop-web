@@ -2,13 +2,13 @@ import SideMenu from "@/components/SideMenu";
 import { Button, Tabs } from "antd";
 import { useState } from "react";
 
-const Layout = ({ContentProducts, ContentCategories, ContentDiscounts})=>{
+const Layout = ({ ContentProducts, ContentCategories, ContentDiscounts, ContentOrders })=>{
     const [isCollapsed, setIsCollapsed] = useState(true);
     function toggleMenu(){
         setIsCollapsed(prev=>!prev);
     }
 
-    const items = [
+    const tabItems = [
         {
             key: "0",
             label: <Button className="menu-icon" onClick={toggleMenu}>
@@ -16,21 +16,30 @@ const Layout = ({ContentProducts, ContentCategories, ContentDiscounts})=>{
                     </Button>,
             disabled: true
         },
+        ContentProducts != null &&
         {
             key: "1",
             label: <div className="menu-option">Artículos</div>,
             children: ContentProducts
         },
+        ContentCategories != null &&
         {
             key: "2",
             label: <div className="menu-option">Categorías</div>,
             children: ContentCategories
         },
-        // {
-        //     key: "3",
-        //     label: <div className="menu-option">Descuentos</div>,
-        //     children: ContentDiscounts
-        // }
+        ContentDiscounts != null &&
+        {
+            key: "3",
+            label: <div className="menu-option">Descuentos</div>,
+            children: ContentDiscounts
+        },
+        ContentOrders != null &&
+        {
+            key: "4",
+            label: <div className="menu-option">Ordenes</div>,
+            children: ContentOrders
+        },
     ];
 
     return(
@@ -39,7 +48,7 @@ const Layout = ({ContentProducts, ContentCategories, ContentDiscounts})=>{
             <Tabs
                 className="tab-wrapper"
                 defaultActiveKey="1"
-                items={items}
+                items={tabItems}
             />
         </div>
     );

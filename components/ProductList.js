@@ -22,31 +22,33 @@ const ProductList = ({products, categories, addItemToCart, enabled, isProduct, s
                               </div>
                             }
                           description={
-                            <div>
-                              {product.categories && product.categories.map((c)=>{
-                                let category = ""
-                                switch(c){
-                                  case "Caliente":
-                                    if(enabled){
-                                      category = <img key={c} className="category-icon" src="./assets/bonfire.png" alt="Caliente"/>;
-                                    }else{
-                                      if(product.drinkType == "Caliente") category = <img key={c} className="category-icon" src="./assets/bonfire.png" alt="Caliente"/>;
-                                    }
-                                    break;
-                                  case "Frio":
-                                    if(enabled){
-                                      category = <img key={c} className="category-icon" src="./assets/snowflake.png" alt="Frio"/>;
-                                    }else{
-                                      if(product.drinkType == "Frio") category = <img key={c} className="category-icon" src="./assets/snowflake.png" alt="Frio"/>;
-                                    }
-                                    // category = enabled && <img key={c} className="category-icon" src="./assets/snowflake.png" alt="Caliente"/>;
-                                    break;
-                                  default:
-                                    category = c += " ";
-                                    break;
-                                }
-                                return category
-                              })}
+                            <div className="drinkDetails-wrapper">
+                              <div>
+                                {product.categories && product.categories.map((c)=>{
+                                  let category = ""
+                                  switch(c){
+                                    case "Caliente":
+                                      if(enabled){
+                                        category = <img key={c} className="category-icon" src="./assets/bonfire.png" alt="Caliente"/>;
+                                      }else{
+                                        if(product.drinkType == "Caliente") category = <img key={c} className="category-icon" src="./assets/bonfire.png" alt="Caliente"/>;
+                                      }
+                                      break;
+                                    case "Frio":
+                                      if(enabled){
+                                        category = <img key={c} className="category-icon" src="./assets/snowflake.png" alt="Frio"/>;
+                                      }else{
+                                        if(product.drinkType == "Frio") category = <img key={c} className="category-icon" src="./assets/snowflake.png" alt="Frio"/>;
+                                      }
+                                      // category = enabled && <img key={c} className="category-icon" src="./assets/snowflake.png" alt="Caliente"/>;
+                                      break;
+                                    default:
+                                      category = c += " ";
+                                      break;
+                                  }
+                                  return category
+                                })}
+                              </div>
                                 <span>
                                   {!enabled && <img className="icon" src="./assets/coffee.png" alt="Size"/>}
                                   {!enabled && sizes.find(s=>s.id == product.size).name}
@@ -73,7 +75,7 @@ const ProductList = ({products, categories, addItemToCart, enabled, isProduct, s
               <List.Item className="list-row" onClick={()=> enabled && filterProducts(category.name)}>
                 <List.Item.Meta 
                         className={enabled ? "list-product" : ""}
-                        avatar={<img className="list-image" alt={category.name} src={`./assets/product-images/not-found.png`}/>}
+                        avatar={<img className="list-image list-category" alt={category.name} src={category.image != null ? `./assets/${category.image}` : `./assets/product-images/not-found.png`}/>}
                         title={
                             <div className="list-header">
                               <span>{category.name}</span> 

@@ -9,6 +9,11 @@
     object-fit: cover;
 }
 
+.grid-category{
+    object-fit: contain;
+    padding: 10%;
+}
+
 .grid-header{
     display: flex; 
     flex-direction: row;
