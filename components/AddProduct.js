@@ -1,3 +1,4 @@
+
 const AddProduct  = ({categories})=>{
     function chkCategory(categoryName){
         let chk = document.getElementById(`chk_${categoryName}`);

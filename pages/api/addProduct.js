@@ -4,21 +4,19 @@ const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error']
 });
 
-export default async function handler(req,res){
+export default async function handler(req, res){
     if(req.method == 'POST'){
         try{
             const { name, price, selectedCategories } = req.body;
-
             const drink = await prisma.drink.create({
                 data: {
-                    name: name, 
+                    name: name,
                     price: parseInt(price),
                     image: "not-found.png",
                     categories: {
                         connect: selectedCategories.map(c=>{
                             return({
                                 ...c,
-                                updatedAt: null
                             });
                         })
                     }

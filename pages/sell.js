@@ -6,7 +6,7 @@ import ProductList from "@/components/ProductList";
 import Checkout from "@/components/Checkout";
 import { PrismaClient } from '@prisma/client'
 
-export async function getStaticProps(){
+export async function getServerSideProps(){
     const prisma        = new PrismaClient({
         // omit: {
         //     category: {createdAt: true, updatedAt: true},
@@ -442,7 +442,7 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
                 }
                 ContentOrders = {
                     <div className="sell-wrapper">
-                        <h1>Ordenes</h1>
+                        <h1 className="order-header">Ordenes</h1>
                         <div className="accordion accordion-wrapper" id="accordionOrder">
                             {
                                 orders.map(o => {
