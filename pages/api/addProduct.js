@@ -16,7 +16,9 @@ export default async function handler(req, res){
                     categories: {
                         connect: selectedCategories.map(c=>{
                             return({
-                                ...c,
+                                "id": c.id,
+                                "name": c.name,
+                                "image": c.image
                             });
                         })
                     }
