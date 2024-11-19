@@ -15,7 +15,7 @@ const ProductGrid = ({products, categories, addItemToCart, isProduct, filterProd
                   onClick={()=> addItemToCart(product)}
                   hoverable
                   size="small"
-                  cover={<img className="grid-image" alt={product.name} src={`./assets/product-images/${product.image}`}/>}
+                  cover={<img className="grid-image" alt={product.name} src={product.image != null ? product.image : './assets/product-images/not-found.png'}/>}
               >
                 <Meta 
                     title={
@@ -61,7 +61,7 @@ const ProductGrid = ({products, categories, addItemToCart, isProduct, filterProd
                   onClick={()=> filterProducts(category.name)}
                   hoverable
                   size="small"
-                  cover={<img className="grid-image grid-category" alt={category.name} src={category.image != null ? `./assets/${category.image}` : `./assets/product-images/not-found.png`}/>}
+                  cover={<img className="grid-image grid-category" alt={category.name} src={category.image != null ? `./assets/${category.image}` : './assets/product-images/not-found.png'}/>}
               >
                   <Meta 
                       title={

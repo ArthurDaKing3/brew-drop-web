@@ -13,7 +13,7 @@ const ProductList = ({products, categories, addItemToCart, enabled, isProduct, s
                 <List.Item className="list-row" onClick={()=> enabled && addItemToCart(product) }>
                   <List.Item.Meta 
                           className={enabled ? "list-product" : ""}
-                          avatar={<img className="list-image" alt={product.name} src={`./assets/product-images/${product.image}`}/>}
+                          avatar={<img className="list-image" alt={product.name} src={product.image != null ? product.image : './assets/product-images/not-found.png'}/>}
                           title={
                               <div className="list-header">
                                 <span>{product.name}</span> 
@@ -75,7 +75,7 @@ const ProductList = ({products, categories, addItemToCart, enabled, isProduct, s
               <List.Item className="list-row" onClick={()=> enabled && filterProducts(category.name)}>
                 <List.Item.Meta 
                         className={enabled ? "list-product" : ""}
-                        avatar={<img className="list-image list-category" alt={category.name} src={category.image != null ? `./assets/${category.image}` : `./assets/product-images/not-found.png`}/>}
+                        avatar={<img className="list-image list-category" alt={category.name} src={category.image != null ? `./assets/${category.image}` : './assets/product-images/not-found.png'}/>}
                         title={
                             <div className="list-header">
                               <span>{category.name}</span> 

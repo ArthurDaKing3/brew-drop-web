@@ -7,12 +7,15 @@ const prisma = new PrismaClient({
 export default async function handler(req, res){
     if(req.method == 'POST'){
         try{
-            const { name, price, selectedCategories } = req.body;
+            const { name, price, selectedCategories, imageUrl } = req.body;
+
+            console.log(imageUrl)
+
             const drink = await prisma.drink.create({
                 data: {
                     name: name,
                     price: parseInt(price),
-                    image: "not-found.png",
+                    image: imageUrl,
                     categories: {
                         connect: selectedCategories.map(c=>{
                             return({

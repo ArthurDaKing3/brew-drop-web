@@ -1,11 +1,14 @@
-import Layout from "../components/Layout";  
+import { useEffect } from 'react';
+import { useRouter } from "next/router";
 
 const Home = () => {
-  return(
-    <div className="App">
-      <Layout />
-    </div>
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push('/sell');
+  }, [router]);
+
+  return null;
   
 };
 

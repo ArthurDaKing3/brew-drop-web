@@ -11,11 +11,19 @@ const AddProduct  = ({categories})=>{
         categories.map(c=>{
             document.getElementById(`chk_${c.name}`).checked = false;
         });
+        document.getElementById("fl_image").value = "";
         document.getElementById("collapseOne").classList.remove("show")
         window.scrollTo(0, 0);
     }
 
     async function addProduct(){
+        Swal.fire({
+            title: 'Creando Producto...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading()
+            },
+          })
 
         const name = document.getElementById("in_name").value;
         const price = document.getElementById("in_price").value;
@@ -25,14 +33,31 @@ const AddProduct  = ({categories})=>{
                 return parseInt(chk_category.value);
             }
         });
+        const fileInput = document.getElementById("fl_image");
+        const image = fileInput.files[0]
+
+        const formData = new FormData();
+        formData.append('file', image);
+        formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
 
         try {
+            const cloudinaryResponse = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData,
+            });
+            const cloudinaryData = await cloudinaryResponse.json();
+
             const response = await fetch('/api/addProduct', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({ name, price, selectedCategories }),
+              body: JSON.stringify({ 
+                    name, 
+                    price, 
+                    selectedCategories, 
+                    imageUrl: cloudinaryData.secure_url  
+                }),
             });
             
             if (response.ok) {
