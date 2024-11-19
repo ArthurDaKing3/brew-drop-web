@@ -35,7 +35,7 @@ const AddProduct  = ({categories})=>{
         if(price === "") warning = "Ingresa un precio para el producto"
         if(selectedCategories.length == 0) warning = "Selecciona al menos una categría para el producto"
         if(image.size > 11365697) warning = "El tamaño de la imagen excede el límite, intenta subir otra imagen"
-        if(image.type != "image/png" || image.type != "image/jpg") warning = `La extensión: ${image.type.replace("image/",".")} no es compatible para imágenes, favor de utilizar .png o .jpg`}
+        if(image.type != "image/png" || image.type != "image/jpg") warning = `La extensión: ${image.type.replace("image/",".")} no es compatible para imágenes, favor de utilizar .png o .jpg`
 
         if(warning != ""){
             Swal.fire({
