@@ -25,31 +25,39 @@ const AddProduct  = ({categories})=>{
                 return parseInt(chk_category.value);
             }
         });
+        
+        const fileInput = document.getElementById("fl_image");
+        const image = fileInput.files.length > 0 ? fileInput.files[0] : ""
+        
+        // Validations
         let warning = ""
-        if(name == "" || price == "" || selectedCategories.length == 0){
+        if(name == "") warning = "Ingresa un nombre par el producto"
+        if(price === "") warning = "Ingresa un precio para el producto"
+        if(selectedCategories.length == 0) warning = "Selecciona al menos una categría para el producto"
+        if(image.size > 11365697) warning = "El tamaño de la imagen excede el límite, intenta subir otra imagen"
+        if(image.type != "image/png" || image.type != "image/jpg") warning = `La extensión: ${image.type.replace("image/",".")} no es compatible para imágenes, favor de utilizar .png o .jpg`}
+
+        if(warning != ""){
             Swal.fire({
                 title: 'Alerta',
                 icon: 'warning',
-                text: 'Favor de llenar todos los campos del formulario!',
+                text: warning,
               });
               return;
         }
-
-        const fileInput = document.getElementById("fl_image");
-        const image = fileInput.files.length > 0 ? fileInput.files[0] : ""
-
+        
         Swal.fire({
             title: 'Creando Producto...',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading()
             },
-          })
+        })
 
         const formData = new FormData();
         formData.append('file', image);
         formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
-
+        
         try {
             const cloudinaryResponse = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, {
                 method: 'POST',
