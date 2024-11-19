@@ -33,7 +33,7 @@ const AddProduct  = ({categories})=>{
         let warning = ""
         if(image.length != ""){
             if(image.size > 11365697) warning = "El tamaño de la imagen excede el límite, intenta subir otra imagen"
-            if(image.type != "image/png" || image.type != "image/jpg") warning = `La extensión seleccionada no es compatible para imágenes, favor de utilizar .png o .jpg`
+            if(image.type != "image/png" || image.type != "image/jpg" || image.type != "image/jpeg") warning = `La extensión seleccionada no es compatible para imágenes, favor de utilizar .png .jpg o .jpeg`
         }
         if(selectedCategories.length == 0) warning = "Selecciona al menos una categría para el producto"
         if(price === "") warning = "Ingresa un precio para el producto"
