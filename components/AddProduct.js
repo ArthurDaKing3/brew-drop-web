@@ -17,14 +17,6 @@ const AddProduct  = ({categories})=>{
     }
 
     async function addProduct(){
-        Swal.fire({
-            title: 'Creando Producto...',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading()
-            },
-          })
-
         const name = document.getElementById("in_name").value;
         const price = document.getElementById("in_price").value;
         const selectedCategories = categories.filter(c=>{
@@ -33,8 +25,26 @@ const AddProduct  = ({categories})=>{
                 return parseInt(chk_category.value);
             }
         });
+        let warning = ""
+        if(name == "" || price == "" || selectedCategories.length == 0){
+            Swal.fire({
+                title: 'Alerta',
+                icon: 'warning',
+                text: 'Favor de llenar todos los campos del formulario!',
+              });
+              return;
+        }
+
         const fileInput = document.getElementById("fl_image");
-        const image = fileInput.files[0]
+        const image = fileInput.files.length > 0 ? fileInput.files[0] : ""
+
+        Swal.fire({
+            title: 'Creando Producto...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading()
+            },
+          })
 
         const formData = new FormData();
         formData.append('file', image);
