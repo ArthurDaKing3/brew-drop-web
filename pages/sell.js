@@ -195,7 +195,7 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
                     <div class="details-categories">
                         ${categories.join('')}
                     </div>
-                    <img class="details-img" src="./assets/product-images/${item.image}" alt="drink"/>
+                    <img class="details-img" src="${item.image}" alt="drink"/>
                 </div>
             </div>
             <div class="details-options">
