@@ -28,14 +28,16 @@ const AddProduct  = ({categories})=>{
         
         const fileInput = document.getElementById("fl_image");
         const image = fileInput.files.length > 0 ? fileInput.files[0] : ""
-        
+        console.log(image);
         // Validations
         let warning = ""
-        if(name == "") warning = "Ingresa un nombre par el producto"
-        if(price === "") warning = "Ingresa un precio para el producto"
+        if(image.length != ""){
+            if(image.size > 11365697) warning = "El tamaño de la imagen excede el límite, intenta subir otra imagen"
+            if(image.type != "image/png" || image.type != "image/jpg") warning = `La extensión seleccionada no es compatible para imágenes, favor de utilizar .png o .jpg`
+        }
         if(selectedCategories.length == 0) warning = "Selecciona al menos una categría para el producto"
-        if(image.size > 11365697) warning = "El tamaño de la imagen excede el límite, intenta subir otra imagen"
-        if(image.type != "image/png" || image.type != "image/jpg") warning = `La extensión: ${image.type.replace("image/",".")} no es compatible para imágenes, favor de utilizar .png o .jpg`
+        if(price === "") warning = "Ingresa un precio para el producto"
+        if(name == "") warning = "Ingresa un nombre par el producto"
 
         if(warning != ""){
             Swal.fire({
