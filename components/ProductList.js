@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { List } from "antd";
 
-const ProductList = ({products, categories, addItemToCart, enabled, isProduct, sizes, milks, filterProducts})=>{
+const ProductList = ({products, categories, addItemToCart = () => {}, enabled, isProduct, isDiscount = false, sizes = [], milks = [], discounts = [], filterProducts, actions = []})=>{
   if(isProduct){
     return(
       <div>
@@ -18,7 +18,14 @@ const ProductList = ({products, categories, addItemToCart, enabled, isProduct, s
                               <div className="list-header">
                                 <span>{product.name}</span> 
                                 
-                                <span>{!enabled && product.qty ? `$${product.price + sizes.find(s=>s.id==product.size).priceMultiplier} x${product.qty}` : `$${product.price}`}</span>
+                                <span>
+                                  {!enabled && product.qty ? `$${product.price + sizes.find(s=>s.id==product.size).priceMultiplier} x${product.qty}` : `$${product.price}`}
+                                  {
+                                    actions.map(a => {
+                                      return <img key={a.icon} className="icon" alt="edit-icon" src={a.icon} onClick={ () => {a.action(product, "product")} }/>
+                                    })
+                                  }
+                                </span>
                               </div>
                             }
                           description={
@@ -64,7 +71,7 @@ const ProductList = ({products, categories, addItemToCart, enabled, isProduct, s
           />
       </div>
     );
-  }else{
+  }else if(!isDiscount){
     return(
       <div>
         <List 
@@ -72,13 +79,20 @@ const ProductList = ({products, categories, addItemToCart, enabled, isProduct, s
             dataSource={categories}
             split={false}
             renderItem={category => (
-              <List.Item className="list-row" onClick={()=> enabled && filterProducts(category.name)}>
+              <List.Item className="list-row" onClick={() => enabled && filterProducts(category.name)}>
                 <List.Item.Meta 
-                        className={enabled ? "list-product" : ""}
-                        avatar={<img className="list-image list-category" alt={category.name} src={category.image != null ? `./assets/${category.image}` : './assets/product-images/not-found.png'}/>}
+                        className="list-product"
+                        avatar={<img className="list-image list-category" alt={category.name} src={category.image != null ? `${!category.image.startsWith('https') ? './assets/' : ''}${category.image}` : './assets/product-images/not-found.png'}/>}
                         title={
                             <div className="list-header">
                               <span>{category.name}</span> 
+                              <span>
+                                  {
+                                    actions.map(a => {
+                                      return <img key={a.icon} className="icon" alt="edit-icon" src={a.icon} onClick={ () => {a.action(category, "category")} }/>
+                                    })
+                                  }
+                                </span>
                             </div>
                           }
                         />
@@ -86,6 +100,36 @@ const ProductList = ({products, categories, addItemToCart, enabled, isProduct, s
             )}
         />
       </div>
+    );
+  }else{
+    return(
+      <div>
+          <List 
+              className="list-wrapper"
+              dataSource={discounts}
+              split={false}
+              renderItem={discount => (
+                <List.Item className="list-row">
+                  <List.Item.Meta 
+                          className="list-product"
+                          avatar={<img className="list-image list-category" alt={discount.description} src={discount.image != null ? `./assets/${discount.image}` : './assets/product-images/not-found.png'}/>}
+                          title={
+                              <div className="list-header">
+                                <span>{discount.description}</span> 
+                                <span>
+                                    {
+                                      actions.map(a => {
+                                        return <img key={a.icon} className="icon" alt="edit-icon" src={a.icon} onClick={ () => {a.action(discount, "discount")} }/>
+                                      })
+                                    }
+                                  </span>
+                              </div>
+                            }
+                          />
+                </List.Item>
+              )}
+          />
+        </div>
     );
   }
    

@@ -309,7 +309,7 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
     function closeDropdown (toggle) {
         document.documentElement.style.overflow = toggle ? 'scroll' : 'hidden';
         setIsDropDownCollapsed(toggle)
-    };
+    }
 
     function toggleView() { 
         setIsGridView(prev=>!prev)
@@ -349,7 +349,6 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
             });
         }
     }
-    
 
     function confirmComplete(orderId){
         const chk_order = document.getElementById(`chk_order${orderId}`);

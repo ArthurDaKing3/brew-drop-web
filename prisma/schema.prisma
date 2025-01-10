@@ -23,7 +23,7 @@ model Category {
   name      String    @db.VarChar(50)
   createdAt DateTime  @default(now()) @db.DateTime(0)
   updatedAt DateTime? @updatedAt @db.DateTime(0)
-  image     String?   @db.VarChar(45)
+  image     String?   @db.VarChar(200)
   drinks    Drink[]   @relation("CategoryToDrink")
 }
 

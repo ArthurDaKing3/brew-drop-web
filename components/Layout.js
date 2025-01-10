@@ -2,10 +2,10 @@ import SideMenu from "@/components/SideMenu";
 import { Button, Tabs } from "antd";
 import { useState } from "react";
 
-const Layout = ({ ContentProducts, ContentCategories, ContentDiscounts, ContentOrders })=>{
+const Layout = ({ ContentProducts, ContentCategories, ContentDiscounts, ContentOrders, HandleTabChange = () => {} })=>{
     const [isCollapsed, setIsCollapsed] = useState(true);
     function toggleMenu(){
-        setIsCollapsed(prev=>!prev);
+        setIsCollapsed(prev => !prev);
     }
 
     const tabItems = [
@@ -19,7 +19,7 @@ const Layout = ({ ContentProducts, ContentCategories, ContentDiscounts, ContentO
         ContentProducts != null &&
         {
             key: "1",
-            label: <div className="menu-option">Artículos</div>,
+            label: <div className="menu-option">Productos</div>,
             children: ContentProducts
         },
         ContentCategories != null &&
@@ -49,6 +49,7 @@ const Layout = ({ ContentProducts, ContentCategories, ContentDiscounts, ContentO
                 className="tab-wrapper"
                 defaultActiveKey="1"
                 items={tabItems}
+                onChange={HandleTabChange}
             />
         </div>
     );
