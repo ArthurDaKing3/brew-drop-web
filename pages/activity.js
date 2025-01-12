@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 const activity = ()=>{
     return(
         <div>
-            <Layout />
+            <Layout CurrentPage={"Activity"}/>
             Activity
         </div>
     );

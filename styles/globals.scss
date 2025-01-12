@@ -54,6 +54,16 @@ div[data-node-key = "1"]{
   padding: 10px !important;
 }
 
+.menu-active{
+  font-weight: 500;
+  color: #556b2f;
+}
+
+.menu-inactive{
+  font-weight: 300;
+  color: darkgray;
+}
+
 .accordion-wrapper{
    width: 90vw;
 }
@@ -65,5 +75,6 @@ div[data-node-key = "1"]{
 
 .order-header{
   font-size: 1.5rem;
-  margin-top: 4%;
+  margin-bottom: 5%;
+  margin-top: 20px;
 }

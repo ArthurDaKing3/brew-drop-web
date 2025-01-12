@@ -734,6 +734,7 @@ const Catalog = ({categories, drinks, discounts})=>{
     return(
         <div>
             <Layout 
+                CurrentPage={"Catalog"}
                 ContentProducts={
                     showUpdateForm 
                     ?

@@ -106,7 +106,18 @@
 }
 
 .chk-order{
-    margin-left: 75%;
     height: 20px;
     width: 40px;
+}
+
+.accordion-text{
+    white-space: nowrap;
+}
+
+.in-time-order{
+    color: green !important;
+}
+
+.late-order{
+    color: red !important;
 }

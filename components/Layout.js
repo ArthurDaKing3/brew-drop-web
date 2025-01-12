@@ -2,8 +2,9 @@ import SideMenu from "@/components/SideMenu";
 import { Button, Tabs } from "antd";
 import { useState } from "react";
 
-const Layout = ({ ContentProducts, ContentCategories, ContentDiscounts, ContentOrders, HandleTabChange = () => {} })=>{
+const Layout = ({ CurrentPage = "", ContentProducts, ContentCategories, ContentDiscounts, ContentOrders, HandleTabChange = () => {} })=>{
     const [isCollapsed, setIsCollapsed] = useState(true);
+
     function toggleMenu(){
         setIsCollapsed(prev => !prev);
     }
@@ -44,7 +45,11 @@ const Layout = ({ ContentProducts, ContentCategories, ContentDiscounts, ContentO
 
     return(
         <div className="layout-wrapper">
-            <SideMenu isCollapsed={!isCollapsed} toggleMenu={toggleMenu}/>
+            <SideMenu 
+                isCollapsed={!isCollapsed} 
+                toggleMenu={toggleMenu} 
+                currentPage={CurrentPage}
+            />
             <Tabs
                 className="tab-wrapper"
                 defaultActiveKey="1"
