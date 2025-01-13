@@ -4,6 +4,7 @@ import Layout from "../components/Layout";
 import ProductGrid from "@/components/ProductGrid";
 import ProductList from "@/components/ProductList";
 import Checkout from "@/components/Checkout";
+import Orders from "@/components/Orders"
 import { PrismaClient } from '@prisma/client'
 
 export async function getServerSideProps(){
@@ -129,21 +130,10 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
     const [filteredProducts, setFilteredProducts]       = useState([]);
     const [filteredBy, setFilteredBy]                   = useState("");
     const [orders, setOrders]                           = useState(Array.isArray(sales) ? [...sales] : [])
-    const [currentTime, setCurrentTime]                 = useState(Date.now());
     
-    let     tempValue       = "";
-    const   orderTimeLimit  = 10;
+    let tempValue = "";
 
     useEffect(() => {
-        const interval = setInterval(() => {
-        setCurrentTime(Date.now());
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, []);
-    
-    useEffect(() => {
-        // Define la función en el objeto window solo en el cliente
         if (typeof window !== 'undefined') {
             window.setDrinkType = function(t){
                 tempValue = t;
@@ -157,8 +147,8 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
     }, );
 
     useEffect(() => {
-        // Define la función en el objeto window solo en el cliente
         if (typeof window !== 'undefined') {
+
             window.applyDiscount = function (percentage, discountId, discountName) {
                 setPrice((prevPrice) => prevPrice - Math.round(prevPrice * (percentage / 100)));
                 setDiscount(discountId);
@@ -170,16 +160,6 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
             };
         }
     }, []);
-
-    const orderTimeElapsed = (createdAt) => {
-        const createdTime = new Date(createdAt).getTime();
-        const differenceInMs = currentTime - createdTime;
-        const totalSeconds = Math.floor(differenceInMs / 1000);
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = (totalSeconds % 60).toString().padStart(2, "0");
-
-        return {minutes, seconds};
-    };
     
     function addItemToCart(item){
         let categories = []
@@ -329,64 +309,6 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
         setIsGridView(prev=>!prev)
     }
 
-    async function completeOrder(orderId, updateOrders) {
-        try {
-            const response = await fetch('/api/completeOrder', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ orderId }),
-            });
-    
-            if (!response.ok) {
-                const errorDetails = await response.json();
-                throw new Error(errorDetails.message);
-            }
-    
-            const { data } = await response.json();
-    
-            Swal.fire({
-                icon: 'success',
-                title: `Orden #${data.id} completada!`,
-            });
-    
-            const updatedOrders = orders.filter(order => order.id !== orderId);
-            setOrders(updatedOrders);
-
-    
-        } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error al completar la orden',
-                text: error.message,
-            });
-        }
-    }
-
-    function confirmComplete(orderId){
-        const chk_order = document.getElementById(`chk_order${orderId}`);
-        
-        Swal.fire({
-            title: `Orden# ${orderId}`,
-            showCancelButton: true,
-            confirmButtonText: 'Completar',
-            cancelButtonText: 'Cancelar'
-        }).then((result)=>{
-            if(!result.isConfirmed) chk_order.checked = false;
-            else{
-                Swal.fire({
-                    title: 'Completando Orden...',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    },
-                });
-                completeOrder(orderId);
-            }
-        });
-    }
-
     return(
         <div>
             <Layout 
@@ -455,56 +377,26 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
                     </div>
                 }
                 ContentOrders = {
-                    <div className="sell-wrapper">
-                        <h1 className="order-header">Ordenes</h1>
-                        <div className="accordion accordion-wrapper" id="accordionOrder">
-                            {
-                                orders.map(o => {
-                                    const orderTimer = orderTimeElapsed(o.createdAt)
-                                    return(
-                                        <div className="accordion-item" key={o.id}>
-                                            <h2 className="accordion-header" id={`heading${o.id}`}>
-                                            <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target={`#collapse${o.id}`} aria-expanded="true" aria-controls={`collapse${o.id}`}>
-                                                <span className={"accordion-text"}>Orden #{o.id}</span>
-                                                <input id={`chk_order${o.id}`} className="chk-order" type="checkbox" onClick={()=>confirmComplete(o.id)}/>
-                                                <span className={orderTimer.minutes < orderTimeLimit ? "in-time-order" : "late-order"}>
-                                                    {orderTimer.minutes + ' : ' + orderTimer.seconds}
-                                                </span>
-                                            </button>
-                                            </h2>
-                                            <div id={`collapse${o.id}`} class="accordion-collapse collapse" aria-labelledby={`heading${o.id}`}>
-                                                <div className="accordion-body">
-                                                    <div className="order-wrapper">
-                                                        <ProductList 
-                                                            isProduct={true}
-                                                            products={o.saleDetail} 
-                                                            enabled={false}
-                                                            contained={true}
-                                                            sizes={sizes}
-                                                            milks={milks}/>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })
-                            }
-                        </div>
-                       
-                    </div>
+                   <Orders 
+                    orders      = {orders}
+                    setOrders   = {setOrders}
+                    sizes       = {sizes}
+                    milks       = {milks}
+                   />
                 }
             />
             <Checkout 
-                cartItems={cartItems} 
-                itemCount={itemCount}
-                price = {price} 
-                discount = {discount}
-                clearCart = {clearCart}
-                showDiscounts = {showDiscounts}
+                cartItems           = {cartItems} 
+                itemCount           = {itemCount}
+                price               = {price} 
+                discount            = {discount}
+                clearCart           = {clearCart}
+                showDiscounts       = {showDiscounts}
                 isDropDownCollapsed = {isDropDownCollapsed}
-                closeDropdown = {closeDropdown}
-                sizes={sizes}
-                milks={milks}/>
+                closeDropdown       = {closeDropdown}
+                sizes               = {sizes}
+                milks               = {milks}
+            />
         </div>
     );
 }
