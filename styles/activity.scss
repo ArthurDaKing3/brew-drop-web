@@ -1,0 +1,26 @@
+.activity-wrapper{
+    width: 100vw;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 15vh;
+}
+
+.chart-container{
+    position: relative;
+    width: 40vw;
+    height: 35vh;
+    margin: auto;
+    margin-bottom: 10vh; 
+}
+
+@media (max-width: 500px){
+    .chart-container{
+        position: relative;
+        width: 90vw;
+        height: 35vh;
+        margin: auto;
+        margin-bottom: 10vh; 
+    }    
+
+}

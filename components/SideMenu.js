@@ -41,7 +41,7 @@ const SideMenu = ({isCollapsed, toggleMenu, currentPage})=>{
           </div>
         </li>
       </ul>
-      <span className="version">V7.0.0</span>
+      <span className="version">V7.0.1</span>
     </Drawer>
   );
 };

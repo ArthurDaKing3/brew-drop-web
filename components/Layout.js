@@ -2,7 +2,19 @@ import SideMenu from "@/components/SideMenu";
 import { Button, Tabs } from "antd";
 import { useState } from "react";
 
-const Layout = ({ CurrentPage = "", ContentProducts, ContentCategories, ContentDiscounts, ContentOrders, HandleTabChange = () => {} })=>{
+const Layout = 
+({ 
+      CurrentPage = ""
+    , ContentProducts
+    , ContentCategories
+    , ContentDiscounts
+    , ContentOrders
+    , SalesActivity
+    , ProductsActivity
+    , DiscountsActivity
+    , HandleTabChange = () => {} 
+}) => {
+
     const [isCollapsed, setIsCollapsed] = useState(true);
 
     function toggleMenu(){
@@ -41,6 +53,25 @@ const Layout = ({ CurrentPage = "", ContentProducts, ContentCategories, ContentD
             label: <div className="menu-option">Ordenes</div>,
             children: ContentOrders
         },
+        SalesActivity != null &&
+        {
+            key: "1",
+            label: <div className="menu-option">Ventas</div>,
+            children: SalesActivity
+        },
+        ProductsActivity != null &&
+        {
+            key: "2",
+            label: <div className="menu-option">Productos</div>,
+            children: ProductsActivity
+        },
+        DiscountsActivity != null &&
+        {
+            key: "3",
+            label: <div className="menu-option">Descuentos</div>,
+            children: DiscountsActivity
+        },
+
     ];
 
     return(
