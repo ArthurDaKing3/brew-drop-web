@@ -30,48 +30,57 @@ const DropDown = ({cartItems, itemCount, price, discount, sizes, milks, isCollap
             return;
         }
         Swal.fire({
-        title: 'Cobrar',
-        html: `<input type='number' inputmode='numeric' pattern='[0-9]*' id='cash-input' class='cash-input' placeholder='Ingrese dinero' />`,
-        showCancelButton: true,
-        confirmButtonText: 'Cambio',
-        showLoaderOnConfirm: true,
-        preConfirm: () => {
-            const enteredCash = document.getElementById("cash-input").value;
-            if(enteredCash == 0){
-                Swal.showValidationMessage("Porfavor ingresa una cantidad a cobrar");
-                return;
-            }
-            const change = enteredCash - price;
-            return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(change);
-            }, 1000);
-            });
-        },
-        allowOutsideClick: () => !Swal.isLoading()
-        }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-            title: `Cambio: ${result.value}`,
-            html: "\
-            <script src='https://cdn.lordicon.com/lordicon.js'></script>\
-            <lord-icon\
-                src='https://cdn.lordicon.com/tjiwvnho.json'\
-                trigger='loop'\
-                delay='500'\
-                state='morph-destroyed'\
-                style='width:200px;height:200px'>\
-            </lord-icon>\
-            ",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            confirmButtonText: 'Cobrar',
+            title: 'Cobrar',
+            html: `<input type='number' inputmode='numeric' pattern='[0-9]*' id='cash-input' class='cash-input' placeholder='Ingrese dinero' />`,
+            showCancelButton: true,
+            confirmButtonText: 'Cambio',
+            showLoaderOnConfirm: true,
             preConfirm: () => {
-                registerSale(price, discount);
-                return false;
-            }
-            });
-        }
+                const enteredCash = document.getElementById("cash-input").value;
+                if(enteredCash <= 0 || enteredCash < price){
+                    Swal.showValidationMessage("Porfavor ingresa una cantidad válida a cobrar");
+                    return;
+                }
+                const change = enteredCash - price;
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(change);
+                    }, 1000);
+                });
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                    title: `Cambio: ${result.value}`,
+                    html: "\
+                    <script src='https://cdn.lordicon.com/lordicon.js'></script>\
+                    <lord-icon\
+                        src='https://cdn.lordicon.com/tjiwvnho.json'\
+                        trigger='loop'\
+                        delay='500'\
+                        state='morph-destroyed'\
+                        style='width:200px;height:200px'>\
+                    </lord-icon>\
+                    ",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    confirmButtonText: 'Cobrar',
+                    preConfirm: () => {
+                        Swal.fire({
+                            text: 'Registrando venta...',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            allowEnterKey: false,
+                            didOpen: () => {
+                                Swal.showLoading()
+                            }
+                        })
+                        registerSale(price, discount);
+                        return false;
+                    }
+                    });
+                }
         });
     }
 
@@ -106,9 +115,14 @@ const DropDown = ({cartItems, itemCount, price, discount, sizes, milks, isCollap
                     delay='500'\
                     style='width:250px;height:150px'>\
                 </lord-icon>",
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
               }).then((result)=>{
-                if(result.isConfirmed) clearCart();
+                if(result.isConfirmed){
+                    clearCart();
+                    window.location.reload();
+                }
               })
           } catch (error) {
             Swal.fire({
@@ -117,10 +131,8 @@ const DropDown = ({cartItems, itemCount, price, discount, sizes, milks, isCollap
                 <br/> ${error}`,
                 icon: 'error',
                 confirmButtonText: 'OK'
-              }).then((result)=>{
-                if(result.isConfirmed) clearCart();
               })
-              }
+           }
     }
     return(
         <div style={isCollapsed ? {display:"none"} : {}} className="dropdown-wrapper">

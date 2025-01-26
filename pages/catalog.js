@@ -412,7 +412,7 @@ const Catalog = ({categories, drinks, discounts})=>{
                     title: 'Error',
                     icon: 'error',
                     text: `Ocurrió un error al subir la imagen: ${error}`,
-                    });
+                });
                     return;
             }
         }
@@ -445,6 +445,7 @@ const Catalog = ({categories, drinks, discounts})=>{
                     confirmButtonText: 'OK'
                 }).then( res =>{
                     setShowUpdateForm(false);
+                    window.location.reload();
                 });
             }else{
                 const errorDetails = await response.json();
@@ -578,6 +579,7 @@ const Catalog = ({categories, drinks, discounts})=>{
                     confirmButtonText: 'OK'
                 }).then( res =>{
                     setShowUpdateForm(false);
+                    window.location.reload();
                 });
             }else{
                 const errorDetails = await response.json();

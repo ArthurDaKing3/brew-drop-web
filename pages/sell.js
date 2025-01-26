@@ -300,13 +300,13 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
         setFilteredProducts([]);
     }
 
-    function closeDropdown (toggle) {
+    function closeDropdown(toggle) {
         document.documentElement.style.overflow = toggle ? 'scroll' : 'hidden';
         setIsDropDownCollapsed(toggle)
     }
 
     function toggleView() { 
-        setIsGridView(prev=>!prev)
+        setIsGridView(prev => !prev)
     }
 
     return(

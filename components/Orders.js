@@ -37,7 +37,7 @@ const Orders = ({orders, setOrders, sizes, milks}) => {
             if(!result.isConfirmed) chk_order.checked = false;
             else{
                 Swal.fire({
-                    title: 'Completando Orden...',
+                    text: 'Completando Orden...',
                     allowOutsideClick: false,
                     didOpen: () => {
                         Swal.showLoading();

@@ -167,7 +167,7 @@ const activity = ()=>{
                 SalesActivity = {
                     <div className="activity-wrapper">
                         {/* Ventas Diarias */}
-                        <div class="chart-container" >
+                        <div className="chart-container" >
                             <Bar
                                 data={{
                                     labels: dailySales.hours,
