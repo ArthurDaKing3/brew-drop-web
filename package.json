@@ -23,7 +23,8 @@
     "react-dom": "^18",
     "sass": "^1.77.4",
     "sequelize": "^6.37.3",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "sweetalert2-react-content": "^5.1.0"
   },
   "devDependencies": {
     "postcss": "^8",

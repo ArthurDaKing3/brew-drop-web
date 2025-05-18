@@ -136,6 +136,7 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
     useEffect(() => {
         if (typeof window !== 'undefined') {
             window.setDrinkType = function(t){
+                
                 tempValue = t;
                 let icon = document.getElementById(t);
                 icon.style.filter = "grayscale(0)"
@@ -178,7 +179,8 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
                 break;
             }
             return category
-          })
+        })
+
         Swal.fire({
             title: 'Detalles de la Bebida',
             html:
@@ -198,7 +200,7 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
                     <select id="milk" style="margin-top:10px" class="swal2-input">
                         <option value="0">Elige...</option>
                         ${milks.map(m => (
-                            `<option value=${m.id}>${m.name}</option>`
+                            `<option value=${m.id} ${m.name == "N/A" ? "selected" : ""}>${m.name}</option>`
                         ))}
                     </select>
                 </div>
@@ -208,20 +210,26 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
                     <select id="size" style="margin-top:10px" class="swal2-input">
                         <option value="0">Elige...</option>
                         ${sizes.map(s=>(
-                            `<option value=${s.id}>${s.name}</option>`
+                            `<option value=${s.id} ${s.name == "N/A" ? "selected" : ""}>${s.name}</option>`
                         ))}
                     </select>
                 </div>
 
                 <div class="details-option">
                     <label for="qty">Cant:</label>
-                    <input id="qty" type="number" inputmode='numeric' pattern='[0-9]*' style="margin-top:10px" class="swal2-input" min="1" max="10" placeholder="Enter a quantity">
+                    <input id="qty" type="number" inputmode='numeric' pattern='[0-9]*' style="margin-top:10px" class="swal2-input" min="1" max="10" value=1>
                 </div>
             </div>
             `,
             showCancelButton: true,
             confirmButtonText: 'Añadir al carrito',
             cancelButtonText: 'Cancelar',
+            didOpen: () =>{
+                const drinkTypes = item.categories.filter(c => c == "Frio" || c == "Caliente")
+
+                if(drinkTypes.length == 1 && drinkTypes[0] == "Caliente")   setDrinkType('Caliente')
+                if(drinkTypes.length == 1 && drinkTypes[0] == "Frio")       setDrinkType('Frio');
+            },
             preConfirm: () => {
                 const milk = document.getElementById('milk').value;
                 const size = document.getElementById('size').value;
