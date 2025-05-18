@@ -236,7 +236,7 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
                 const qty = document.getElementById('qty').value;
 
                 let error = ""
-                if(qty == 0) error = "Selecciona una cantidad";
+                if(qty == 0) error  = "Selecciona una cantidad";
                 if(size == 0) error = "Selecciona un tamaño";
                 if(milk == 0) error = "Selecciona un tipo de leche";
                 if(tempValue == "") error = "Selecciona si la bebida es fria o caliente";

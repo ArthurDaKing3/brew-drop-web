@@ -114,10 +114,9 @@ const DropDown = ({cartItems, itemCount, price, discount, sizes, milks, isCollap
             <html>
             <head>
                 <title>TICKET</title>
-                <link rel="stylesheet" href="./styles/ticket.css" />
                 <style>${styles}</style>
             </head>
-            <body>
+            <body >
                 ${ticketHtml}
             </body>
             </html>
@@ -128,17 +127,21 @@ const DropDown = ({cartItems, itemCount, price, discount, sizes, milks, isCollap
         printWindow.onload = function() {
             printWindow.focus();
             printWindow.print();
-            printWindow.close();
+
+            printWindow.onafterprint = function() {
+              printWindow.close();
+            };
+            // printWindow.close();
         };
 
         // Fallback por si onload no se dispara (por ejemplo, después de 1 segundo)
-        setTimeout(() => {
-            if (!printWindow.closed) {
-                printWindow.focus();
-                printWindow.print();
-                printWindow.close();
-            }
-        }, 1000);
+        // setTimeout(() => {
+        //     if (!printWindow.closed) {
+        //         printWindow.focus();
+        //         printWindow.print();
+        //         // printWindow.close();
+        //     }
+        // }, 1000);
       };
 
     function calculateChange() {
