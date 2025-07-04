@@ -1,6 +1,21 @@
+// Components
 import Layout from "../components/Layout";
-import {React} from "react";
+import ToggleChartViewMode from "../components/ToggleChartViewMode";
+import ChartSkeleton from "../components/ChartSkeleton";
+
+// Dependencies
+import { React, useEffect, useState } from "react";
 import { Bar, Line, Pie, Doughnut } from "react-chartjs-2";
+
+// Config
+import { dailySalesOptions, getDailySalesData } from "@/config/charts/dailySales";
+import { gaugeOptions, getGaugeData } from "@/config/charts/gauge";
+
+// Hooks
+import useActivityData from "@/hooks/useActivityData";
+
+// Utilities
+import { formatCurrency } from "@/utils/utilites";
 
 import {
   Chart as ChartJS,
@@ -27,62 +42,31 @@ ChartJS.register(
   Legend,
 );
 
-const activity = ()=>{
+const activity = () => {
 
+    const { data, loading, error } = useActivityData();
 
-    const dailySalesOptions={
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false,
-            },
-            title: {
-                display: true,
-                text: 'Ventas Diarias',
-            }
-        }
-    };
-    const dailySales = {
-        hours: ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm"],
-        sales: [100, 200, 150, 300, 250, 400, 350],
-    };
+    const [dailySalesMode, setDailySalesMode] = useState("Dinero"); 
+    const [gaugeMode, setGaugeMode] = useState("Dinero");
     
-
-    const ventasMensuales = 3500; 
-    const objetivoMensual = 6000; 
-    const porcentaje = Math.min((ventasMensuales / objetivoMensual) * 100, 100); // Porcentaje máximo 100
-
-    const gaugeData = {
-        labels: ["Progreso", "Restante"],
-        datasets: [
-        {
-            data: [porcentaje, 100 - porcentaje],
-            backgroundColor: ["#4caf50", "#e0e0e0"],
-            borderWidth: 0,
-            cutout: "80%",
-        },
-        ],
-    };
-    const gaugeOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        rotation: 225,
-        circumference: 270,
-        plugins: {
-            tooltip: {
-                enabled: true,
-            },
-            legend: {
-                display: false,
-            },
-            title: {
-                display: true,
-                text: 'Ventas Mensaules',
-            }
-        },
-    };
+    let dailySales          = {};
+    let gaugeData           = {};
+    let monthlySales        = 0;
+    let monthlySalesGoal    = 0;
+    let monthlyUnitsSaled   = 0;
+    let monthlyUnitsGoal    = 0;
     
+    if(!loading){
+
+        dailySales          = getDailySalesData(data.dailySales, dailySalesMode);
+        gaugeData           = getGaugeData(data.monthlySales, data.monthlySalesGoal, data.monthlyUnitsSaled, data.monthlyUnitsGoal, gaugeMode);
+        monthlySales        = data.monthlySales;
+        monthlySalesGoal    = data.monthlySalesGoal;
+        monthlyUnitsSaled   = data.monthlyUnitsSaled;
+        monthlyUnitsGoal    = data.monthlyUnitsGoal;
+
+    }
+
 
     const salesGrowth = {
         dates: ["01/01", "02/01", "03/01", "04/01"],
@@ -166,32 +150,44 @@ const activity = ()=>{
                 CurrentPage = {"Activity"}
                 SalesActivity = {
                     <div className="activity-wrapper">
+                        
                         {/* Ventas Diarias */}
-                        <div className="chart-container" >
-                            <Bar
-                                data={{
-                                    labels: dailySales.hours,
-                                    datasets: [
-                                        {
-                                            label: "Ventas",
-                                            data: dailySales.sales,
-                                            backgroundColor: "rgba(75, 192, 192, 0.5)",
-                                            borderColor: "rgba(75, 192, 192, 1)",
-                                            borderWidth: 1,
-                                        },
-                                    ],
-                                }}
-                                options={dailySalesOptions}
-                            />
-                        </div>
-
+                        {
+                            loading 
+                            ?
+                               <ChartSkeleton />
+                            :
+                                <div className="chart-container" >
+                                    <Bar
+                                        data = {dailySales}
+                                        options = {dailySalesOptions}
+                                    />
+                                    
+                                    <ToggleChartViewMode handler={setDailySalesMode} viewMode={dailySalesMode} />
+                                    
+                                </div>
+                        }
                         {/* Ventas Mensaules */}
-                        <div className="chart-container">
-                            <Doughnut data={gaugeData} options={gaugeOptions} />
-                            <div style={{ textAlign: "center", marginTop: "-110px", fontSize: "15px" }}>
-                                <strong>{ventasMensuales} / {objetivoMensual}</strong>
-                                <p>Ventas mensuales</p>
-                            </div>
+                        <div>
+                            {
+                            loading 
+                            ?
+                                <ChartSkeleton />
+                            :
+
+                                <div className="chart-container">
+                                    <Doughnut data={gaugeData} options={gaugeOptions} />
+                                
+                                    <div style={{ textAlign: "center", marginTop: "-110px", fontSize: "15px" }}>
+                                        <strong>{gaugeMode == "Dinero" ? `${formatCurrency(monthlySales)} / ${formatCurrency(monthlySalesGoal)}` : `${monthlyUnitsSaled} / ${monthlyUnitsGoal}`}</strong>
+                                        <p>{gaugeMode == "Dinero" ? "Ventas mensuales" : "Unidades Vendidas"}</p>
+                                    </div>
+
+                                    <div style={{ position: "absolute", bottom: "-40px" }}>
+                                        <ToggleChartViewMode handler={setGaugeMode} viewMode={gaugeMode}/>
+                                    </div>
+                                </div>
+                            }
                         </div>
 
                         {/* Crecimiento de Ventas */}
