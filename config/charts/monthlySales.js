@@ -1,4 +1,4 @@
-export const gaugeOptions = {
+export const monthlySalesOptions = {
         responsive: true,
         maintainAspectRatio: false,
         rotation: 225,
@@ -17,9 +17,9 @@ export const gaugeOptions = {
         },
     };
 
-export function getGaugeData(monthlySales, monthlyGoal, monthlyUnitsSaled, monthlyUnitsGoal, gaugeMode) {
+export function getMonthlySalesData({monthlySales, monthlySalesGoal, monthlyUnitsSaled, monthlyUnitsGoal}, gaugeMode) {
 
-    const salesPercentage = Math.min((monthlySales / monthlyGoal) * 100, 100);
+    const salesPercentage = Math.min((monthlySales / monthlySalesGoal) * 100, 100);
     const unitsPercentage = Math.min((monthlyUnitsSaled / monthlyUnitsGoal) * 100, 100);
     const percentage = gaugeMode == "Dinero" ? salesPercentage : unitsPercentage;
 

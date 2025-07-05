@@ -1,22 +1,6 @@
-// Components
-import Layout from "../components/Layout";
-import ToggleChartViewMode from "../components/ToggleChartViewMode";
-import ChartSkeleton from "../components/ChartSkeleton";
-
 // Dependencies
 import { React, useEffect, useState } from "react";
 import { Bar, Line, Pie, Doughnut } from "react-chartjs-2";
-
-// Config
-import { dailySalesOptions, getDailySalesData } from "@/config/charts/dailySales";
-import { gaugeOptions, getGaugeData } from "@/config/charts/gauge";
-
-// Hooks
-import useActivityData from "@/hooks/useActivityData";
-
-// Utilities
-import { formatCurrency } from "@/utils/utilites";
-
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -29,6 +13,23 @@ import {
   ArcElement,
   PointElement,
 } from "chart.js";
+
+// Config
+import { dailySalesOptions, getDailySalesData } from "@/config/charts/dailySales";
+import { monthlySalesOptions, getMonthlySalesData } from "@/config/charts/monthlySales";
+import { salesGrowthOptions, getSalesGrowthData } from "@/config/charts/salesGrowth";
+
+// Hooks
+import useActivityData from "@/hooks/useActivityData";
+
+// Components
+import Layout from "../components/Layout";
+import ToggleChartViewMode from "../components/ToggleChartViewMode";
+import ChartSkeleton from "../components/ChartSkeleton";
+
+// Utilities
+import { formatCurrency } from "@/utils/utilites";
+import { getMonthlySales } from "@/services/activityService";
 
 ChartJS.register(
   CategoryScale,
@@ -45,47 +46,23 @@ ChartJS.register(
 const activity = () => {
 
     const { data, loading, error } = useActivityData();
+    console.log(data);
 
-    const [dailySalesMode, setDailySalesMode] = useState("Dinero"); 
-    const [gaugeMode, setGaugeMode] = useState("Dinero");
+    const [dailySalesMode,      setDailySalesMode]      = useState("Dinero"); 
+    const [monthlySalesMode,    setMonthlySalesMode]    = useState("Dinero");
+    const [salesGrowthMode,     setSalesGrowthMode]     = useState("Dinero");
     
     let dailySales          = {};
-    let gaugeData           = {};
-    let monthlySales        = 0;
-    let monthlySalesGoal    = 0;
-    let monthlyUnitsSaled   = 0;
-    let monthlyUnitsGoal    = 0;
+    let monthlySalesData    = {};
+    let salesGrowthData     = {};
     
     if(!loading){
 
         dailySales          = getDailySalesData(data.dailySales, dailySalesMode);
-        gaugeData           = getGaugeData(data.monthlySales, data.monthlySalesGoal, data.monthlyUnitsSaled, data.monthlyUnitsGoal, gaugeMode);
-        monthlySales        = data.monthlySales;
-        monthlySalesGoal    = data.monthlySalesGoal;
-        monthlyUnitsSaled   = data.monthlyUnitsSaled;
-        monthlyUnitsGoal    = data.monthlyUnitsGoal;
+        monthlySalesData    = getMonthlySalesData({...data.monthlySales}, monthlySalesMode);
+        salesGrowthData     = getSalesGrowthData(data.salesGrowth, salesGrowthMode);
 
     }
-
-
-    const salesGrowth = {
-        dates: ["01/01", "02/01", "03/01", "04/01"],
-        sales: [200, 400, 600, 800],
-    };
-    const salesGrowthOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false,
-            },
-            title: {
-                display: true,
-                text: 'Crecimiento de Ventas',
-            }
-        }
-    };
-
 
     const categoryComparison = {
         categories: ["Esspreso Bar", "Postres", "Frappe"],
@@ -176,39 +153,33 @@ const activity = () => {
                             :
 
                                 <div className="chart-container">
-                                    <Doughnut data={gaugeData} options={gaugeOptions} />
+                                    <Doughnut data={monthlySalesData} options={monthlySalesOptions} />
                                 
                                     <div style={{ textAlign: "center", marginTop: "-110px", fontSize: "15px" }}>
-                                        <strong>{gaugeMode == "Dinero" ? `${formatCurrency(monthlySales)} / ${formatCurrency(monthlySalesGoal)}` : `${monthlyUnitsSaled} / ${monthlyUnitsGoal}`}</strong>
-                                        <p>{gaugeMode == "Dinero" ? "Ventas mensuales" : "Unidades Vendidas"}</p>
+                                        <strong>{monthlySalesMode == "Dinero" ? `${formatCurrency(data.monthlySales.monthlySales)} / ${formatCurrency(data.monthlySales.monthlySalesGoal)}` : `${data.monthlySales.monthlyUnitsSaled} / ${data.monthlySales.monthlyUnitsGoal}`}</strong>
+                                        <p>{monthlySalesMode == "Dinero" ? "Ventas mensuales" : "Unidades Vendidas"}</p>
                                     </div>
 
                                     <div style={{ position: "absolute", bottom: "-40px" }}>
-                                        <ToggleChartViewMode handler={setGaugeMode} viewMode={gaugeMode}/>
+                                        <ToggleChartViewMode handler={setMonthlySalesMode} viewMode={monthlySalesMode}/>
                                     </div>
                                 </div>
                             }
                         </div>
 
                         {/* Crecimiento de Ventas */}
-                        <div className="chart-container">
-                            <Line
-                            data={{
-                                labels: salesGrowth.dates,
-                                datasets: [
-                                {
-                                    label: "Ventas",
-                                    data: salesGrowth.sales,
-                                    borderColor: "rgba(54, 162, 235, 1)",
-                                    backgroundColor: "rgba(54, 162, 235, 0.5)",
-                                    tension: 0.3,
-                                    fill: true,
-                                },
-                                ],
-                            }}
-                            options={salesGrowthOptions}
-                            />
-                        </div>
+                        {
+                            loading 
+                            ?
+                                <ChartSkeleton />
+                            :
+                            <div className="chart-container">
+
+                                <Line  data={salesGrowthData} options={salesGrowthOptions} />
+                                <ToggleChartViewMode handler={setSalesGrowthMode} viewMode={salesGrowthMode}/>
+                    
+                            </div>
+                        }
 
                         {/* Ventas por Categoría */}
                         <div className="chart-container">

@@ -250,10 +250,10 @@ const DropDown = ({cartItems, itemCount, price, discount, sizes, milks, isCollap
                 allowEscapeKey: false,
               }).then((result)=>{
                 if(result.isConfirmed){
-                    printTicket();
-                    clearCart();
-                    window.location.reload();
+                  printTicket();
                 }
+                clearCart();
+                window.location.reload();
               })
           } catch (error) {
             Swal.fire({

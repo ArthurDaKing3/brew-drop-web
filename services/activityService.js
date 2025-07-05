@@ -1,9 +1,13 @@
 import { startOfDay, endOfDay } from "date-fns";
 import { PrismaClient } from "@prisma/client";
+import { subMonths, startOfMonth, endOfMonth, format } from "date-fns";
+
 
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error']
 });
+
+// CHANGE ALL UNITS TO BE REAL UNITS NOT COUNT OF SALES
 
 export async function getDailySales(date = new Date("2024-09-09")) {
   const sales = await prisma.saleMaster.findMany({
@@ -74,4 +78,51 @@ export async function getMonthlySales(date = new Date("2024-09-09")) {
 
   return { monthlySales, monthlyUnitsSaled };
 
+}
+
+export async function getSalesGrowth() {
+const now = new Date();
+  const months = [];
+
+  for (let i = 3; i >= 0; i--) {
+
+    const date = subMonths(now, i);
+    months.push({
+      label: format(date, "MMMM"),
+      start: startOfMonth(date),
+      end: endOfMonth(date),
+    });
+
+  }
+
+  const dates = [];
+  const sales = [];
+  const units = [];
+
+  for (const month of months) {
+    const monthSales = await prisma.saleMaster.findMany({
+      where: {
+        createdAt: {
+          gte: month.start,
+          lte: month.end,
+        },
+      },
+      select: {
+        total: true,
+      },
+    });
+
+    const total = monthSales.reduce((acc, sale) => acc + Number(sale.total), 0);
+    const count = monthSales.length;
+
+    dates.push(month.label);
+    sales.push(total);
+    units.push(count);
+  }
+
+  return {
+    dates,
+    sales,
+    units,
+  };
 }
