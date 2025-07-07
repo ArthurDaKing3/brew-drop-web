@@ -4,84 +4,63 @@ import { subMonths, startOfMonth, endOfMonth, format } from "date-fns";
 
 
 const prisma = new PrismaClient({
-    log: ['query', 'info', 'warn', 'error']
+    log: ['info', 'warn', 'error']
 });
 
-// CHANGE ALL UNITS TO BE REAL UNITS NOT COUNT OF SALES
+// CHANGE DAILY SALES UNITS TO BE REAL UNITS NOT COUNT OF SALES
+export async function getDailySales(date = new Date()) {
 
-export async function getDailySales(date = new Date("2024-09-09")) {
-  const sales = await prisma.saleMaster.findMany({
-    where: {
-      createdAt: {
-        gte: startOfDay(date),
-        lte: endOfDay(date),
-      },
-    },
-    select: {
-      createdAt: true,
-      total: true,
-    },
-  });
+  const sales = await prisma.$queryRawUnsafe(`
+        SELECT 
+          HOUR(SM.createdAt) AS hour,
+          SUM(total) AS total,
+          SUM(quantity) AS quantity
+        FROM 
+          SaleMaster AS SM
+        INNER JOIN 
+          SaleDetail AS SD
+            ON SM.id = SD.saleMasterId
+        WHERE 
+          DATE(SM.createdAt) = "${date.toISOString().split("T")[0]}"
+        GROUP BY 
+          HOUR(SM.createdAt)
+    `);
 
-  const grouped = {};
-
-  for (const sale of sales) {
-    const hour = sale.createdAt.getHours();
-
-    if (!grouped[hour]) {
-      grouped[hour] = { total: 0, count: 0 };
-    }
-
-    grouped[hour].total += Number(sale.total);
-    grouped[hour].count += 1;
-  }
-
-  const sortedHours = Object.keys(grouped)
-    .map((h) => parseInt(h))
-    .sort((a, b) => a - b);
-
-  const formattedHours = sortedHours.map((h) => {
-    const suffix = h < 12 ? "am" : "pm";
-    const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  const hours = sales.map((sale) => {
+    const hour = sale.hour;
+    const suffix = hour < 12 ? "am" : "pm";
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
     return `${hour12}${suffix}`;
   });
 
-  const salesTotal = sortedHours.map((h) => grouped[h].total);
-  const salesUnits = sortedHours.map((h) => grouped[h].count); // <-- aquí está la "quantity"
-
+  const salesTotal = sales.map((sale) => sale.total);
+  const salesUnits = sales.map((sale) => sale.quantity);
+  
   return {
-    hours: formattedHours,
+    hours,  
     salesTotal,
     salesUnits,
   };
+
+
 }
 
-export async function getMonthlySales(date = new Date("2024-09-09")) {
+export async function getMonthlySales(date = new Date()) {
 
-  const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-  const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-
-  const sales = await prisma.saleMaster.findMany({
-    where: {
-      createdAt: {
-        gte: startOfMonth,
-        lte: endOfMonth,
-      },
-    },
-    select: {
-      total: true,
-    },
-  });
+  const monthStart = startOfMonth(date).toISOString();
+  const monthEnd = endOfMonth(date).toISOString();
+  
+  const sales = await getSalesByMonth(monthStart, monthEnd);
 
   const monthlySales = sales.reduce((sum, sale) => sum + Number(sale.total), 0);
-  const monthlyUnitsSaled = sales.length; 
+  const monthlyUnitsSaled = sales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
 
   return { monthlySales, monthlyUnitsSaled };
 
 }
 
 export async function getSalesGrowth() {
-const now = new Date();
+  const now = new Date();
   const months = [];
 
   for (let i = 3; i >= 0; i--) {
@@ -100,24 +79,15 @@ const now = new Date();
   const units = [];
 
   for (const month of months) {
-    const monthSales = await prisma.saleMaster.findMany({
-      where: {
-        createdAt: {
-          gte: month.start,
-          lte: month.end,
-        },
-      },
-      select: {
-        total: true,
-      },
-    });
+    
+    const result = await getSalesByMonth(month.start.toISOString(), month.end.toISOString());
 
-    const total = monthSales.reduce((acc, sale) => acc + Number(sale.total), 0);
-    const count = monthSales.length;
+    const total = result.reduce((acc, sale) => acc + Number(sale.total), 0);
+    const quantity = result.reduce((acc, sale) => acc + Number(sale.quantity), 0);
 
     dates.push(month.label);
     sales.push(total);
-    units.push(count);
+    units.push(quantity);
   }
 
   return {
@@ -126,3 +96,65 @@ const now = new Date();
     units,
   };
 }
+
+export async function getMonthlySalesByCategory(){
+  const sales =  await prisma.$queryRawUnsafe(`
+        SELECT 
+          C.\`name\` 			  AS category
+          ,SUM(SM.total)		AS total
+          ,SUM(SD.quantity)	AS quantity
+        FROM  
+          SaleMaster 			  AS SM
+        INNER JOIN 
+          SaleDetail 			  AS SD
+            ON SM.id = SD.saleMasterId
+        INNER JOIN 
+          Drink 				    AS D
+            ON SD.drinkId = D.id
+        INNER JOIN 
+          _CategoryToDrink 	AS CTD
+                ON D.id = CTD.B
+        INNER JOIN 
+          Category 			    AS C
+            ON CTD.A = C.id
+        WHERE 
+          MONTH(SM.createdAt) = MONTH(NOW())
+        GROUP BY 
+          C.\`name\`
+    `);
+
+    const categories = sales.map((sale) => sale.category);
+    const totalSales = sales.map((sale) => sale.total);
+    const totalUnits = sales.map((sale) => sale.quantity);
+
+    return {
+        categories,
+        totalSales,
+        totalUnits,
+    };
+}
+
+async function getSalesByMonth(startDate, endDate) {
+
+    return await prisma.$queryRawUnsafe(`
+        SELECT 
+          MONTH(SM.createdAt) AS month,
+          SUM(total)          AS total,
+          SUM(quantity)       AS quantity
+        FROM 
+          SaleMaster	AS SM
+        INNER JOIN 
+          SaleDetail  AS SD
+            ON SM.id = SD.saleMasterId
+        WHERE 
+          SM.createdAt 
+        BETWEEN 
+          "${startDate}"
+        AND 
+          "${endDate}"
+        GROUP BY 
+          MONTH(SM.createdAt)
+    `);
+
+}
+

@@ -18,6 +18,7 @@ import {
 import { dailySalesOptions, getDailySalesData } from "@/config/charts/dailySales";
 import { monthlySalesOptions, getMonthlySalesData } from "@/config/charts/monthlySales";
 import { salesGrowthOptions, getSalesGrowthData } from "@/config/charts/salesGrowth";
+import { salesByCategoryOptions } from "@/config/charts/salesByCategory";
 
 // Hooks
 import useActivityData from "@/hooks/useActivityData";
@@ -29,7 +30,6 @@ import ChartSkeleton from "../components/ChartSkeleton";
 
 // Utilities
 import { formatCurrency } from "@/utils/utilites";
-import { getMonthlySales } from "@/services/activityService";
 
 ChartJS.register(
   CategoryScale,
@@ -51,37 +51,20 @@ const activity = () => {
     const [dailySalesMode,      setDailySalesMode]      = useState("Dinero"); 
     const [monthlySalesMode,    setMonthlySalesMode]    = useState("Dinero");
     const [salesGrowthMode,     setSalesGrowthMode]     = useState("Dinero");
+    const [salesByCategoryMode, setSalesByCategoryMode] = useState("Dinero");
     
     let dailySales          = {};
     let monthlySalesData    = {};
     let salesGrowthData     = {};
+    let salesByCategoryData = {};
     
     if(!loading){
 
         dailySales          = getDailySalesData(data.dailySales, dailySalesMode);
         monthlySalesData    = getMonthlySalesData({...data.monthlySales}, monthlySalesMode);
         salesGrowthData     = getSalesGrowthData(data.salesGrowth, salesGrowthMode);
-
+        salesByCategoryData = data.monthlySalesByCategory;
     }
-
-    const categoryComparison = {
-        categories: ["Esspreso Bar", "Postres", "Frappe"],
-        sales: [300, 500, 200],
-    };
-    const categoryComparisonOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-            },
-            title: {
-                display: true,
-                text: 'Ventas por Categoría'
-            }
-        }
-    };
-    
 
     const topProducts = {
         names: ["Producto A", "Producto B", "Producto C"],
@@ -182,34 +165,41 @@ const activity = () => {
                         }
 
                         {/* Ventas por Categoría */}
-                        <div className="chart-container">
-                            {/* <h1 className="form-subtitle">Ventas por Categoría</h1> */}
-                            <Pie
-                            data={{
-                                labels: categoryComparison.categories,
-                                datasets: [
-                                {
-                                    label: "Ventas",
-                                    data: categoryComparison.sales,
-                                    backgroundColor: [
-                                    "rgba(255, 99, 132, 0.5)",
-                                    "rgba(54, 162, 235, 0.5)",
-                                    "rgba(255, 206, 86, 0.5)",
-                                    "rgba(75, 192, 192, 0.5)",
-                                    ],
-                                    borderColor: [
-                                    "rgba(255, 99, 132, 1)",
-                                    "rgba(54, 162, 235, 1)",
-                                    "rgba(255, 206, 86, 1)",
-                                    "rgba(75, 192, 192, 1)",
-                                    ],
-                                    borderWidth: 1,
-                                },
-                                ],
-                            }}
-                            options={categoryComparisonOptions}
-                            />
-                        </div>
+                        {
+                            loading
+                            ?
+                                <ChartSkeleton />
+                            :
+                                <div className="chart-container">
+                                    <Pie
+                                        data={{
+                                            labels: salesByCategoryData.categories,
+                                            datasets: [
+                                            {
+                                                label: salesByCategoryMode == "Dinero" ? "Ventas ($)" : "Unidades Vendidas",
+                                                data: salesByCategoryMode == "Dinero" ? salesByCategoryData.totalSales : salesByCategoryData.totalUnits,
+                                                backgroundColor: [
+                                                    "rgba(255, 99, 132, 0.5)",
+                                                    "rgba(54, 162, 235, 0.5)",
+                                                    "rgba(255, 206, 86, 0.5)",
+                                                    "rgba(75, 192, 192, 0.5)",
+                                                ],
+                                                borderColor: [
+                                                    "rgba(255, 99, 132, 1)",
+                                                    "rgba(54, 162, 235, 1)",
+                                                    "rgba(255, 206, 86, 1)",
+                                                    "rgba(75, 192, 192, 1)",
+                                                ],
+                                                borderWidth: 1,
+                                            },
+                                            ],
+                                        }}
+                                        options={salesByCategoryOptions}
+                                    />
+                                    <ToggleChartViewMode handler={setSalesByCategoryMode} viewMode={salesByCategoryMode} />
+                                </div>
+
+                        }
                     </div>
                 }
 

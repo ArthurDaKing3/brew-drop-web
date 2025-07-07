@@ -1,14 +1,15 @@
-import { getDailySales, getMonthlySales, getSalesGrowth } from "@/services/activityService";
+import { getDailySales, getMonthlySales, getSalesGrowth, getMonthlySalesByCategory } from "@/services/activityService";
 
 export default async function handler(req, res) {
 
   try {
 
-    const [dailySales, monthlySales, salesGrowth] = await Promise.all([
+    const [dailySales, monthlySales, salesGrowth, salesByCategory] = await Promise.all([
 
       getDailySales(),
       getMonthlySales(),  
       getSalesGrowth(), 
+      getMonthlySalesByCategory(),
     
     ]);
 
@@ -21,6 +22,11 @@ export default async function handler(req, res) {
           monthlySalesGoal: 10000, 
           monthlyUnitsGoal: 500,
         },
+      monthlySalesByCategory: {
+        categories: salesByCategory.categories,
+        totalSales: salesByCategory.totalSales,
+        totalUnits: salesByCategory.totalUnits,
+      }
     };
 
     res.status(200).json(data);
