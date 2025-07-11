@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function useActivityData() {
+export default function useAPIData(endpoint) {
 
     const [data, setData]       = useState(null);
     const [error, setError]     = useState(null);
@@ -10,14 +10,14 @@ export default function useActivityData() {
         const fetchData = async () => {
             try {
 
-                const res = await fetch("/api/activity");
+                const res = await fetch(endpoint);
                 const json = await res.json();
                 setData(json);
 
             } catch (err) {
 
                 setError(err);
-                console.error("Error en useActivityData:", err);
+                console.error("Error en useAPIData:", err);
 
             } finally {
 

@@ -14,17 +14,33 @@ export const dailySalesOptions =
     }
 };
 
-export function getDailySalesData(data, dailySalesMode){
-    return {
-            labels: data.hours,
-            datasets: [
-                {
-                    label: dailySalesMode === "Dinero" ? "Ventas ($)" : "Unidades Vendidas",
-                    data: dailySalesMode === "Dinero" ? data.salesTotal : data.salesUnits,
-                    backgroundColor: "rgba(75, 192, 192, 0.5)",
-                    borderColor: "rgba(75, 192, 192, 1)",
-                    borderWidth: 1,
-                },
-            ],
-        };
+export function getDailySalesData({hours, salesTotal, salesUnits}) {
+    return (
+        {
+            DataBySales:{
+                labels: hours,
+                datasets: [
+                    {
+                        label: "Ventas ($)",
+                        data: salesTotal,
+                        backgroundColor: "rgba(75, 192, 192, 0.5)",
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 1,
+                    },
+                ],
+            },
+            DataByUnits:{
+                labels: hours,
+                datasets: [
+                    {
+                        label: "Unidades Vendidas",
+                        data: salesUnits,
+                        backgroundColor: "rgba(75, 192, 192, 0.5)",
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 1,
+                    },
+                ],
+            }
+        }
+    );
 }

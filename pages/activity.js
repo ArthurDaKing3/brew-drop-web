@@ -1,6 +1,6 @@
 // Dependencies
-import { React, useEffect, useState } from "react";
-import { Bar, Line, Pie, Doughnut } from "react-chartjs-2";
+import { React } from "react";
+import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,23 +14,6 @@ import {
   PointElement,
 } from "chart.js";
 
-// Config
-import { dailySalesOptions, getDailySalesData } from "@/config/charts/dailySales";
-import { monthlySalesOptions, getMonthlySalesData } from "@/config/charts/monthlySales";
-import { salesGrowthOptions, getSalesGrowthData } from "@/config/charts/salesGrowth";
-import { salesByCategoryOptions } from "@/config/charts/salesByCategory";
-
-// Hooks
-import useActivityData from "@/hooks/useActivityData";
-
-// Components
-import Layout from "../components/Layout";
-import ToggleChartViewMode from "../components/ToggleChartViewMode";
-import ChartSkeleton from "../components/ChartSkeleton";
-
-// Utilities
-import { formatCurrency } from "@/utils/utilites";
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -43,27 +26,41 @@ ChartJS.register(
   Legend,
 );
 
+// Config
+import { dailySalesOptions, getDailySalesData } from "@/config/charts/dailySales";
+import { monthlySalesOptions, getMonthlySalesData } from "@/config/charts/monthlySales";
+import { salesGrowthOptions, getSalesGrowthData } from "@/config/charts/salesGrowth";
+import { salesByCategoryOptions } from "@/config/charts/salesByCategory";
+
+// Hooks
+import useAPIData from "@/hooks/useAPIData";
+
+// Components
+import Layout from "../components/Layout";
+import ChartSkeleton from "../components/ChartSkeleton";
+import DailySalesChart from "../components/charts/DailySalesChart";
+import MonthlySalesChart from "../components/charts/MonthlySalesChart";
+import SalesGrowthChart from "../components/charts/SalesGrowthChart";
+import MonthlySalesByCategoryChart from "../components/charts/MonthlySalesByCategoryChart";
+
+
+
 const activity = () => {
 
-    const { data, loading, error } = useActivityData();
-    console.log(data);
-
-    const [dailySalesMode,      setDailySalesMode]      = useState("Dinero"); 
-    const [monthlySalesMode,    setMonthlySalesMode]    = useState("Dinero");
-    const [salesGrowthMode,     setSalesGrowthMode]     = useState("Dinero");
-    const [salesByCategoryMode, setSalesByCategoryMode] = useState("Dinero");
-    
-    let dailySales          = {};
+    const { data, loading, error } = useAPIData("/api/activity");
+        
+    let dailySalesData      = {};
     let monthlySalesData    = {};
     let salesGrowthData     = {};
     let salesByCategoryData = {};
     
     if(!loading){
 
-        dailySales          = getDailySalesData(data.dailySales, dailySalesMode);
-        monthlySalesData    = getMonthlySalesData({...data.monthlySales}, monthlySalesMode);
-        salesGrowthData     = getSalesGrowthData(data.salesGrowth, salesGrowthMode);
+        dailySalesData      = getDailySalesData(data.dailySales);
+        monthlySalesData    = getMonthlySalesData(data.monthlySales);
+        salesGrowthData     = getSalesGrowthData(data.salesGrowth);
         salesByCategoryData = data.monthlySalesByCategory;
+
     }
 
     const topProducts = {
@@ -115,17 +112,12 @@ const activity = () => {
                         {
                             loading 
                             ?
-                               <ChartSkeleton />
+                                <ChartSkeleton />
                             :
-                                <div className="chart-container" >
-                                    <Bar
-                                        data = {dailySales}
-                                        options = {dailySalesOptions}
-                                    />
-                                    
-                                    <ToggleChartViewMode handler={setDailySalesMode} viewMode={dailySalesMode} />
-                                    
-                                </div>
+                                <DailySalesChart 
+                                    dailySalesData     = {dailySalesData}
+                                    dailySalesOptions  = {dailySalesOptions}
+                                />
                         }
                         {/* Ventas Mensaules */}
                         <div>
@@ -134,19 +126,11 @@ const activity = () => {
                             ?
                                 <ChartSkeleton />
                             :
-
-                                <div className="chart-container">
-                                    <Doughnut data={monthlySalesData} options={monthlySalesOptions} />
-                                
-                                    <div style={{ textAlign: "center", marginTop: "-110px", fontSize: "15px" }}>
-                                        <strong>{monthlySalesMode == "Dinero" ? `${formatCurrency(data.monthlySales.monthlySales)} / ${formatCurrency(data.monthlySales.monthlySalesGoal)}` : `${data.monthlySales.monthlyUnitsSaled} / ${data.monthlySales.monthlyUnitsGoal}`}</strong>
-                                        <p>{monthlySalesMode == "Dinero" ? "Ventas mensuales" : "Unidades Vendidas"}</p>
-                                    </div>
-
-                                    <div style={{ position: "absolute", bottom: "-40px" }}>
-                                        <ToggleChartViewMode handler={setMonthlySalesMode} viewMode={monthlySalesMode}/>
-                                    </div>
-                                </div>
+                                <MonthlySalesChart 
+                                    monthlySalesData    = {monthlySalesData}
+                                    monthlySalesOptions = {monthlySalesOptions}
+                                    monthlySalesLabels  = {data.monthlySales}
+                                />
                             }
                         </div>
 
@@ -156,12 +140,10 @@ const activity = () => {
                             ?
                                 <ChartSkeleton />
                             :
-                            <div className="chart-container">
-
-                                <Line  data={salesGrowthData} options={salesGrowthOptions} />
-                                <ToggleChartViewMode handler={setSalesGrowthMode} viewMode={salesGrowthMode}/>
-                    
-                            </div>
+                                <SalesGrowthChart
+                                    salesGrowthData     = {salesGrowthData}
+                                    salesGrowthOptions  = {salesGrowthOptions}
+                                />
                         }
 
                         {/* Ventas por Categoría */}
@@ -170,35 +152,10 @@ const activity = () => {
                             ?
                                 <ChartSkeleton />
                             :
-                                <div className="chart-container">
-                                    <Pie
-                                        data={{
-                                            labels: salesByCategoryData.categories,
-                                            datasets: [
-                                            {
-                                                label: salesByCategoryMode == "Dinero" ? "Ventas ($)" : "Unidades Vendidas",
-                                                data: salesByCategoryMode == "Dinero" ? salesByCategoryData.totalSales : salesByCategoryData.totalUnits,
-                                                backgroundColor: [
-                                                    "rgba(255, 99, 132, 0.5)",
-                                                    "rgba(54, 162, 235, 0.5)",
-                                                    "rgba(255, 206, 86, 0.5)",
-                                                    "rgba(75, 192, 192, 0.5)",
-                                                ],
-                                                borderColor: [
-                                                    "rgba(255, 99, 132, 1)",
-                                                    "rgba(54, 162, 235, 1)",
-                                                    "rgba(255, 206, 86, 1)",
-                                                    "rgba(75, 192, 192, 1)",
-                                                ],
-                                                borderWidth: 1,
-                                            },
-                                            ],
-                                        }}
-                                        options={salesByCategoryOptions}
-                                    />
-                                    <ToggleChartViewMode handler={setSalesByCategoryMode} viewMode={salesByCategoryMode} />
-                                </div>
-
+                                <MonthlySalesByCategoryChart
+                                    salesByCategoryData     = {salesByCategoryData}
+                                    salesByCategoryOptions  = {salesByCategoryOptions}
+                                />
                         }
                     </div>
                 }
