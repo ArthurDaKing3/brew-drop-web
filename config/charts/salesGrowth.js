@@ -12,7 +12,7 @@ export const salesGrowthOptions = {
     }
 };
 
-export function getSalesGrowthData(salesGrowth) {
+export function formatSalesGrowthData(salesGrowth) {
     return(
         {
             DataBySales: {

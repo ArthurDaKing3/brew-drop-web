@@ -12,12 +12,17 @@ export default function useAPIData(endpoint) {
 
                 const res = await fetch(endpoint);
                 const json = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(json.message || "Error al obtener los datos");
+                }
+
                 setData(json);
 
-            } catch (err) {
+            } catch (error) {
 
-                setError(err);
-                console.error("Error en useAPIData:", err);
+                setError(error.message);
+                console.error("Error en useAPIData:", error);
 
             } finally {
 

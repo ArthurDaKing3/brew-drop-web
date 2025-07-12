@@ -12,6 +12,7 @@ const DailySalesChart = ({ dailySalesData, dailySalesOptions }) => {
 
     return (
         <div className="chart-container">
+            
             <Bar
                 data={
                     dailySalesMode == "Dinero"
@@ -20,7 +21,9 @@ const DailySalesChart = ({ dailySalesData, dailySalesOptions }) => {
                 }
                 options={dailySalesOptions}
             />
+
             <ToggleChartViewMode handler={setDailySalesMode} viewMode={dailySalesMode} />
+            
         </div>
     );
 

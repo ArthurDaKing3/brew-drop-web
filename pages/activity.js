@@ -27,9 +27,10 @@ ChartJS.register(
 );
 
 // Config
-import { dailySalesOptions, getDailySalesData } from "@/config/charts/dailySales";
-import { monthlySalesOptions, getMonthlySalesData } from "@/config/charts/monthlySales";
-import { salesGrowthOptions, getSalesGrowthData } from "@/config/charts/salesGrowth";
+import { dailySalesOptions, formatDailySalesData } from "@/config/charts/dailySales";
+import { monthlySalesOptions, formatMonthlySalesData } from "@/config/charts/monthlySales";
+import { salesGrowthOptions, formatSalesGrowthData } from "@/config/charts/salesGrowth";
+import { topProductsOptions, formatTopProductsData } from "@/config/charts/topProducts";
 import { salesByCategoryOptions } from "@/config/charts/salesByCategory";
 
 // Hooks
@@ -38,50 +39,67 @@ import useAPIData from "@/hooks/useAPIData";
 // Components
 import Layout from "../components/Layout";
 import ChartSkeleton from "../components/ChartSkeleton";
+import ErrorAlert from "../components/ErrorAlert";
 import DailySalesChart from "../components/charts/DailySalesChart";
 import MonthlySalesChart from "../components/charts/MonthlySalesChart";
 import SalesGrowthChart from "../components/charts/SalesGrowthChart";
 import MonthlySalesByCategoryChart from "../components/charts/MonthlySalesByCategoryChart";
+import TopSoldProducts from "../components/charts/TopSoldProducts";
 
+
+// const chartsCatalog = [
+//     {
+//         name: "Ventas Diarias",
+//         component: DailySalesChart,
+//         data: formatDailySalesData,
+//         options: dailySalesOptions,
+//     },
+//     {
+//         name: "Ventas Mensuales",
+//         component: MonthlySalesChart,
+//         data: formatMonthlySalesData,
+//         options: monthlySalesOptions,
+//     },
+//     {
+//         name: "Crecimiento de Ventas",
+//         component: SalesGrowthChart,
+//         data: formatSalesGrowthData,
+//         options: salesGrowthOptions,
+//     },
+//     {
+//         name: "Ventas por Categoría",
+//         component: MonthlySalesByCategoryChart,
+//         data: null, 
+//         options: salesByCategoryOptions,
+//     },
+//     {
+//         name: "Productos Más Vendidos",
+//         component: TopSoldProducts,
+//         data: formatTopProductsData,
+//         options: topProductsOptions,
+//     }
+// ]
 
 
 const activity = () => {
 
     const { data, loading, error } = useAPIData("/api/activity");
-        
+    
     let dailySalesData      = {};
     let monthlySalesData    = {};
     let salesGrowthData     = {};
     let salesByCategoryData = {};
+    let topProductsData     = {};
     
-    if(!loading){
+    if(!loading && !error) {
 
-        dailySalesData      = getDailySalesData(data.dailySales);
-        monthlySalesData    = getMonthlySalesData(data.monthlySales);
-        salesGrowthData     = getSalesGrowthData(data.salesGrowth);
+        dailySalesData      = formatDailySalesData(data.dailySales);
+        monthlySalesData    = formatMonthlySalesData(data.monthlySales);
+        salesGrowthData     = formatSalesGrowthData(data.salesGrowth);
         salesByCategoryData = data.monthlySalesByCategory;
+        topProductsData     = formatTopProductsData(data.topProducts);
 
     }
-
-    const topProducts = {
-        names: ["Producto A", "Producto B", "Producto C"],
-        sales: [500, 400, 300],
-    };
-    const topProductsOptions = {
-        indexAxis: "y",
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false,
-            },
-            title: {
-                display: true,
-                text: 'Productos mas vendidos'
-            }
-        }
-    };
-
     
     const promotionPerformance = {
         names: ["Promo 1", "Promo 2"],
@@ -106,11 +124,14 @@ const activity = () => {
             <Layout 
                 CurrentPage = {"Activity"}
                 SalesActivity = {
+                    error 
+                    ? ErrorAlert({ message: error }) 
+                    :
                     <div className="activity-wrapper">
                         
                         {/* Ventas Diarias */}
                         {
-                            loading 
+                            loading
                             ?
                                 <ChartSkeleton />
                             :
@@ -129,7 +150,6 @@ const activity = () => {
                                 <MonthlySalesChart 
                                     monthlySalesData    = {monthlySalesData}
                                     monthlySalesOptions = {monthlySalesOptions}
-                                    monthlySalesLabels  = {data.monthlySales}
                                 />
                             }
                         </div>
@@ -161,29 +181,28 @@ const activity = () => {
                 }
 
                 ProductsActivity={
+                    error 
+                    ? ErrorAlert({ message: error }) 
+                    :
                     <div className="activity-wrapper">
-                        {/* Productos Más Vendidos */}
-                        <div className="chart-container">
-                            <Bar
-                                data={{
-                                    labels: topProducts.names,
-                                    datasets: [
-                                    {
-                                        label: "Ventas",
-                                        data: topProducts.sales,
-                                        backgroundColor: "rgba(153, 102, 255, 0.5)",
-                                        borderColor: "rgba(153, 102, 255, 1)",
-                                        borderWidth: 1,
-                                    },
-                                    ],
-                                }}
-                                options={topProductsOptions}
-                            />
-                        </div>
+                        
+                        {/* Productos mas vendidos */}
+                        {
+                                loading
+                                ?
+                                    <ChartSkeleton />
+                                :
+                                    <TopSoldProducts
+                                        topProductsData    = {topProductsData}
+                                        topProductsOptions = {topProductsOptions} />
+                        }
                     </div>
                 }
 
                 DiscountsActivity={
+                    error 
+                    ? ErrorAlert({ message: error }) 
+                    :
                     <div className="activity-wrapper">
                         {/* Desempeño de Promociones */}
                         <div className="chart-container">
@@ -206,7 +225,6 @@ const activity = () => {
                     </div>
                 }
             />
-            
         </div>
     );
 }

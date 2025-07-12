@@ -14,7 +14,7 @@ export const dailySalesOptions =
     }
 };
 
-export function getDailySalesData({hours, salesTotal, salesUnits}) {
+export function formatDailySalesData({hours, salesTotal, salesUnits}) {
     return (
         {
             DataBySales:{

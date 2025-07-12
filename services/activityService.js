@@ -13,8 +13,8 @@ export async function getDailySales(date = new Date()) {
   const sales = await prisma.$queryRawUnsafe(`
         SELECT 
           HOUR(SM.createdAt) AS hour,
-          SUM(total) AS total,
-          SUM(quantity) AS quantity
+          SUM(total)         AS total,
+          SUM(quantity)      AS quantity
         FROM 
           SaleMaster AS SM
         INNER JOIN 
@@ -27,7 +27,7 @@ export async function getDailySales(date = new Date()) {
     `);
 
   const hours = sales.map((sale) => {
-    const hour = sale.hour;
+    const hour = Number(sale.hour);
     const suffix = hour < 12 ? "am" : "pm";
     const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
     return `${hour12}${suffix}`;
@@ -35,12 +35,13 @@ export async function getDailySales(date = new Date()) {
 
   const salesTotal = sales.map((sale) => sale.total);
   const salesUnits = sales.map((sale) => sale.quantity);
-  
+
   return {
     hours,  
     salesTotal,
     salesUnits,
   };
+
 
 
 }
@@ -53,9 +54,9 @@ export async function getMonthlySales(date = new Date()) {
   const sales = await getSalesByMonth(monthStart, monthEnd);
 
   const monthlySales = sales.reduce((sum, sale) => sum + Number(sale.total), 0);
-  const monthlyUnitsSaled = sales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
+  const monthlyUnitsSold = sales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
 
-  return { monthlySales, monthlyUnitsSaled };
+  return { monthlySales, monthlyUnitsSold };
 
 }
 
@@ -155,6 +156,37 @@ async function getSalesByMonth(startDate, endDate) {
         GROUP BY 
           MONTH(SM.createdAt)
     `);
+
+}
+
+export async function getTopProducts() {
+
+  const result = await prisma.$queryRawUnsafe(`
+      SELECT
+          D.name 		    AS Product
+        , SUM(D.price)	AS TotalSales
+        , COUNT(D.name) AS TotalUnits
+      FROM 
+        SaleDetail 	AS SD
+      INNER JOIN 	
+        Drink 		  AS D
+          ON SD.drinkId = D.id
+      GROUP BY 
+        D.name
+      ORDER BY 
+        TotalSales DESC
+      LIMIT 4
+    `);
+
+    const productNames = result.map((item) => item.Product);
+    const totalSales = result.map((item) => Number(item.TotalSales));
+    const totalUnits = result.map((item) => Number(item.TotalUnits));
+
+    return {
+        productNames,
+        totalSales,
+        totalUnits,
+    };
 
 }
 
