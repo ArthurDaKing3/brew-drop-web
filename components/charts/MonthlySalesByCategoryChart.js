@@ -5,19 +5,19 @@ import { useState } from "react";
 // Components
 import ToggleChartViewMode from "../../components/ToggleChartViewMode";
 
-const MonthlySalesByCategoryChart = ({ salesByCategoryData, salesByCategoryOptions }) => {
+const MonthlySalesByCategoryChart = ({ data, options }) => {
     
-    const [salesByCategoryMode, setSalesByCategoryMode] = useState("Dinero");
+    const [salesByCategoryMode, setSalesByCategoryMode] = useState("Ventas");
     
     return(
         <div className="chart-container">
             <Pie
                 data={{
-                    labels: salesByCategoryData.categories,
+                    labels: data.categories,
                     datasets: [
                     {
-                        label: salesByCategoryMode == "Dinero" ? "Ventas ($)" : "Unidades Vendidas",
-                        data: salesByCategoryMode == "Dinero" ? salesByCategoryData.totalSales : salesByCategoryData.totalUnits,
+                        label: salesByCategoryMode == "Ventas" ? "Ventas ($)" : "Unidades Vendidas",
+                        data: salesByCategoryMode == "Ventas" ? data.totalSales : data.totalUnits,
                         backgroundColor: [
                             "rgba(255, 99, 132, 0.5)",
                             "rgba(54, 162, 235, 0.5)",
@@ -34,7 +34,7 @@ const MonthlySalesByCategoryChart = ({ salesByCategoryData, salesByCategoryOptio
                     },
                     ],
                 }}
-                options={salesByCategoryOptions}
+                options={options}
             />
             <ToggleChartViewMode handler={setSalesByCategoryMode} viewMode={salesByCategoryMode} />
         </div>

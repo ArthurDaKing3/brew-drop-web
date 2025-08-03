@@ -386,10 +386,10 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
                 }
                 ContentOrders = {
                    <Orders 
-                    orders      = {orders}
-                    setOrders   = {setOrders}
-                    sizes       = {sizes}
-                    milks       = {milks}
+                        orders      = {orders}
+                        setOrders   = {setOrders}
+                        sizes       = {sizes}
+                        milks       = {milks}
                    />
                 }
             />

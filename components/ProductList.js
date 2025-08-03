@@ -16,10 +16,13 @@ const ProductList = ({products, categories, addItemToCart = () => {}, enabled, c
                           avatar={<img className="list-image" alt={product.name} src={product.image != null ? product.image : './assets/product-images/not-found.png'}/>}
                           title={
                               <div className="list-header">
-                                <span>{product.name}</span> 
+                                <span>
+                                  {product.name}
+                                  {!enabled && product.quantity && ` x${product.quantity}`}
+                                </span> 
                                 
                                 <span>
-                                  {!enabled && product.qty ? `$${product.price + sizes.find(s=>s.id==product.size).priceMultiplier} x${product.qty}` : `$${product.price}`}
+                                  {!enabled && product.qty && `$${product.price + sizes.find(s=>s.id==product.size).priceMultiplier} x${product.qty}`}
                                   {
                                     actions.map(a => {
                                       return <img key={a.icon} className="icon" alt="edit-icon" src={a.icon} onClick={ () => {a.action(product, "product")} }/>

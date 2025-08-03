@@ -6,20 +6,20 @@ import { useState } from "react";
 import ToggleChartViewMode from "../../components/ToggleChartViewMode";
 
 
-const DailySalesChart = ({ dailySalesData, dailySalesOptions }) => {
+const DailySalesChart = ({ data, options }) => {
     
-    const [dailySalesMode, setDailySalesMode] = useState("Dinero"); 
+    const [dailySalesMode, setDailySalesMode] = useState("Ventas"); 
 
     return (
         <div className="chart-container">
             
             <Bar
-                data={
-                    dailySalesMode == "Dinero"
-                    ? dailySalesData.DataBySales
-                    : dailySalesData.DataByUnits
+                data={ 
+                    dailySalesMode == "Ventas"
+                    ? data.DataBySales
+                    : data.DataByUnits
                 }
-                options={dailySalesOptions}
+                options={options}
             />
 
             <ToggleChartViewMode handler={setDailySalesMode} viewMode={dailySalesMode} />

@@ -6,21 +6,20 @@ import { useState } from "react";
 import ToggleChartViewMode from "../../components/ToggleChartViewMode";
 
 
-const SalesGrowthChart = ({ salesGrowthData, salesGrowthOptions }) => {
+const SalesGrowthChart = ({ data, options }) => {
     
-    const [salesGrowthMode, setSalesGrowthMode] = useState("Dinero");
-    
+    const [salesGrowthMode, setSalesGrowthMode] = useState("Ventas");
     
     return(
         <div className="chart-container">
 
             <Line  
                 data={
-                    salesGrowthMode === "Dinero"
-                    ? salesGrowthData.DataBySales
-                    : salesGrowthData.DataByUnits
+                    salesGrowthMode === "Ventas"
+                    ? data.DataBySales
+                    : data.DataByUnits
                 } 
-                options={salesGrowthOptions} 
+                options={options} 
             />
             <ToggleChartViewMode handler={setSalesGrowthMode} viewMode={salesGrowthMode}/>
 

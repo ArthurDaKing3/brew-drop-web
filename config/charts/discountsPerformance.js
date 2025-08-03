@@ -1,17 +1,19 @@
-export const salesByCategoryOptions = {
+
+
+export const discountsPerformanceOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
         legend: {
-            position: 'bottom',
+            display: false,
         },
         title: {
             display: true,
-            text: 'Ventas mensuales por Categoría'
+            text: 'Desempeño de Descuentos'
         }
     }
 };
 
-export function formatSalesByCategoryData(data){
+export function formatDiscountsPerformanceData(data){
     return data;
 };

@@ -8,28 +8,28 @@ import ToggleChartViewMode from "../../components/ToggleChartViewMode";
 // Utilities
 import { formatCurrency } from "@/utils/utilites";
 
-const MonthlySalesChart = ({monthlySalesData, monthlySalesOptions}) => {
+const MonthlySalesChart = ({data, options}) => {
     
-    const [monthlySalesMode, setMonthlySalesMode] = useState("Dinero");
+    const [monthlySalesMode, setMonthlySalesMode] = useState("Ventas");
 
-    const monthlySalesLabels      = monthlySalesData.Labels;
-    const monthlySalesDataBySales = monthlySalesData.Data.DataBySales;
-    const monthlySalesDataByUnits = monthlySalesData.Data.DataByUnits;
+    const monthlySalesLabels      = data.Labels;
+    const monthlySalesDataBySales = data.Data.DataBySales;
+    const monthlySalesDataByUnits = data.Data.DataByUnits;
 
     return(
         <div className="chart-container">
             <Doughnut 
                 data = {
-                    monthlySalesMode == "Dinero"
+                    monthlySalesMode == "Ventas"
                     ? monthlySalesDataBySales
                     : monthlySalesDataByUnits
                 } 
-                options = {monthlySalesOptions} 
+                options = {options} 
             />
         
             <div style={{ textAlign: "center", marginTop: "-100px", fontSize: "15px" }}>
-                <strong>{monthlySalesMode == "Dinero" ? `${formatCurrency(monthlySalesLabels.monthlySales)} / ${formatCurrency(monthlySalesLabels.monthlySalesGoal)}` : `${monthlySalesLabels.monthlyUnitsSold} / ${monthlySalesLabels.monthlyUnitsGoal}`}</strong>
-                <p>{monthlySalesMode == "Dinero" ? "Ventas mensuales" : "Unidades Vendidas"}</p>
+                <strong>{monthlySalesMode == "Ventas" ? `${formatCurrency(monthlySalesLabels.monthlySales)} / ${formatCurrency(monthlySalesLabels.monthlySalesGoal)}` : `${monthlySalesLabels.monthlyUnitsSold} / ${monthlySalesLabels.monthlyUnitsGoal}`}</strong>
+                <p>{monthlySalesMode == "Ventas" ? "Ventas mensuales" : "Unidades Vendidas"}</p>
             </div>
 
             <ToggleChartViewMode handler={setMonthlySalesMode} viewMode={monthlySalesMode}/>

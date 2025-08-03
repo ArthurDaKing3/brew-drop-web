@@ -1,13 +1,10 @@
-import { startOfDay, endOfDay } from "date-fns";
 import { PrismaClient } from "@prisma/client";
 import { subMonths, startOfMonth, endOfMonth, format } from "date-fns";
-
 
 const prisma = new PrismaClient({
     log: ['info', 'warn', 'error']
 });
 
-// CHANGE DAILY SALES UNITS TO BE REAL UNITS NOT COUNT OF SALES
 export async function getDailySales(date = new Date()) {
 
   const sales = await prisma.$queryRawUnsafe(`
@@ -27,10 +24,12 @@ export async function getDailySales(date = new Date()) {
     `);
 
   const hours = sales.map((sale) => {
+
     const hour = Number(sale.hour);
     const suffix = hour < 12 ? "am" : "pm";
     const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
     return `${hour12}${suffix}`;
+
   });
 
   const salesTotal = sales.map((sale) => sale.total);
@@ -55,8 +54,10 @@ export async function getMonthlySales(date = new Date()) {
 
   const monthlySales = sales.reduce((sum, sale) => sum + Number(sale.total), 0);
   const monthlyUnitsSold = sales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
+  const monthlySalesGoal = 10000; 
+  const monthlyUnitsGoal = 500;
 
-  return { monthlySales, monthlyUnitsSold };
+  return { monthlySales, monthlyUnitsSold, monthlySalesGoal, monthlyUnitsGoal};
 
 }
 
@@ -165,7 +166,7 @@ export async function getTopProducts() {
       SELECT
           D.name 		    AS Product
         , SUM(D.price)	AS TotalSales
-        , COUNT(D.name) AS TotalUnits
+        , SUM(quantity) AS TotalUnits
       FROM 
         SaleDetail 	AS SD
       INNER JOIN 	
@@ -190,3 +191,44 @@ export async function getTopProducts() {
 
 }
 
+export async function getDiscountsPerformance(){
+  
+  const result = await prisma.$queryRawUnsafe(`
+    WITH CTE_DetailsCount AS 
+    (
+      SELECT 
+         saleMasterId
+        ,SUM(quantity) AS Quantity
+      FROM 
+        SaleDetail
+      GROUP BY 
+        saleMasterId
+    )
+    SELECT 
+       CONCAT(D.description, ' (', D.percentage, '%)')		AS Discount
+      ,SUM(SM.total)		AS TotalSales
+      ,SUM(DC.Quantity)	AS TotalUnits
+    FROM  
+      SaleMaster 			AS SM
+    INNER JOIN 
+      Discount 			AS D
+        ON SM.discountId = D.id
+    INNER JOIN 	
+      CTE_DetailsCount 	AS DC
+        ON SM.id = DC.saleMasterId
+    GROUP BY 
+      D.description
+
+    `)
+
+  const discountNames = result.map((item) => item.Discount);
+  const totalSales = result.map((item) => Number(item.TotalSales));
+  const totalUnits = result.map((item) => Number(item.TotalUnits));
+  
+  return {
+    discountNames,
+    totalSales,
+    totalUnits,
+  };
+
+}
