@@ -56,14 +56,14 @@ export async function getServerSideProps({ req }) {
 }
 
 const activity = ({ config }) => {
-    
-    if(config.error) return ErrorAlert({ message: config.error });
+
+    if(config.error) return ErrorAlert({ message: "Failed to load tenant configuration", details: config.error });
     console.log("Tenant Config Loaded: ", config);
 
     const ActivityDashboardLayout = config.ActivityDashboardLayout;
     const { data, loading, error } = useAPIData("/api/activity");
-    
-    if (error) return ErrorAlert({ message: error });
+
+    if (error) return ErrorAlert({ message: "Failed to load activity data", details: error });
 
     return(
         <div>

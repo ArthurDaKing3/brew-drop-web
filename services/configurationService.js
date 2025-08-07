@@ -34,7 +34,7 @@ export async function getConfigForTenant(tenant) {
         return configMap;
     }
     catch (error) {
-        throw new Error("Failed to load tenant configuration");
+        throw new Error(error.message);
     } 
     finally {
         await prisma.$disconnect();
