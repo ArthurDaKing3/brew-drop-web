@@ -42,10 +42,10 @@ import { getConfigForTenant } from "@/services/configurationService";
 
 export async function getServerSideProps({ req }) {
 
-  const tenant = req.headers['x-tenant'];
-  const config = await getConfigForTenant(tenant);
+    const tenant = req.headers['x-tenant'];
+    const config = await getConfigForTenant(tenant);
 
-  return {props: { config }};
+    return {props: { config }};
 
 }
 

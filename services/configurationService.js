@@ -1,16 +1,16 @@
 
 import { PrismaClient } from "@prisma/client";
-import NodeCache from 'node-cache';
+// import NodeCache from 'node-cache';
 
-const cache = new NodeCache({ stdTTL: 60 });
+// const cache = new NodeCache({ stdTTL: 60 });
 const prisma = new PrismaClient({
     log: ['info', 'warn', 'error']
 });
 
 export async function getConfigForTenant(tenant) {
 
-    const cached = cache.get(tenant);
-    if (cached) return cached;
+    // const cached = cache.get(tenant);
+    // if (cached) return cached;
 
     const tenantData = await prisma.$queryRawUnsafe(`
         SELECT 
@@ -32,11 +32,11 @@ export async function getConfigForTenant(tenant) {
     const configMap = {};
 
     tenantData?.forEach((c) => {
-    configMap[c.ConfigKey] = c.ConfigValue;
+        configMap[c.ConfigKey] = c.ConfigValue;
     });
 
     console.log("Config Map:", configMap);
-    cache.set(tenant, configMap);
+    // cache.set(tenant, configMap);
 
     return configMap;
 
