@@ -50,6 +50,8 @@ export async function getServerSideProps({ req }) {
 }
 
 const activity = ({config}) => {
+    
+    console.log(config);
 
     const ActivityDashboardLayout = JSON.parse(config.ActivityDashboardLayout);
     const { data, loading, error } = useAPIData("/api/activity");
