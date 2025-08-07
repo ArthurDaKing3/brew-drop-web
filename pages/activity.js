@@ -42,20 +42,27 @@ import { getConfigForTenant } from "@/services/configurationService";
 
 export async function getServerSideProps({ req }) {
 
-    const tenant = req.headers['x-tenant'];
-    const config = await getConfigForTenant(tenant);
+    const host = req.headers.host;
+    const tenant = host?.split('.')[0] || 'default';
 
-    return {props: { config }};
+    try {
+        const config = await getConfigForTenant(tenant);
+        return {props: { config }};
+    } 
+    catch (error) {
+        return {props: { config: {error: error.message} }};
+    }   
 
 }
 
-const activity = ({config}) => {
+const activity = ({ config }) => {
     
-    console.log(config);
+    if(config.error) return ErrorAlert({ message: config.error });
+    console.log("Tenant Config Loaded: ", config);
 
-    const ActivityDashboardLayout = JSON.parse(config.ActivityDashboardLayout);
+    const ActivityDashboardLayout = config.ActivityDashboardLayout;
     const { data, loading, error } = useAPIData("/api/activity");
-
+    
     if (error) return ErrorAlert({ message: error });
 
     return(

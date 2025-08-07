@@ -1,43 +1,44 @@
 
 import { PrismaClient } from "@prisma/client";
-// import NodeCache from 'node-cache';
 
-// const cache = new NodeCache({ stdTTL: 60 });
 const prisma = new PrismaClient({
     log: ['info', 'warn', 'error']
 });
 
 export async function getConfigForTenant(tenant) {
 
-    // const cached = cache.get(tenant);
-    // if (cached) return cached;
+    try{
 
-    const tenantData = await prisma.$queryRawUnsafe(`
-        SELECT 
-            B.BusinessId,
-            B.BusinessName,
-            B.Subdomain,
-            BC.ConfigKey,
-            BC.ConfigValue
-        FROM 
-            tb_BusinessesCatalog AS B
-        INNER JOIN
-            tb_BusinessesConfig AS BC
-                ON B.BusinessId = BC.BusinessId
-        WHERE 
-            B.Subdomain = "${tenant}"
-    `);
+        const tenantData = await prisma.$queryRawUnsafe(`
+            SELECT 
+                B.BusinessId,
+                B.BusinessName,
+                B.Subdomain,
+                BC.ConfigKey,
+                BC.ConfigValue
+            FROM 
+                tb_BusinessesCatalog AS B
+            INNER JOIN
+                tb_BusinessesConfig AS BC
+                    ON B.BusinessId = BC.BusinessId
+            WHERE 
+                B.Subdomain = "${tenant}"
+        `);
 
-    console.log("Tenant Data:", tenantData);
-    const configMap = {};
+        const configMap = {};
 
-    tenantData?.forEach((c) => {
-        configMap[c.ConfigKey] = c.ConfigValue;
-    });
+        tenantData?.forEach((c) => {
+            configMap[c.ConfigKey] = JSON.parse(c.ConfigValue);
+        });
 
-    console.log("Config Map:", configMap);
-    // cache.set(tenant, configMap);
+        return configMap;
+    }
+    catch (error) {
+        throw new Error("Failed to load tenant configuration");
+    } 
+    finally {
+        await prisma.$disconnect();
+    }
 
-    return configMap;
 
 }
