@@ -7,7 +7,8 @@ const prisma = new PrismaClient({
 
 export async function getDailySales(date = new Date()) {
 
-  const sales = await prisma.$queryRawUnsafe(`
+  const sales = await prisma.$queryRaw 
+  `
         SELECT 
           HOUR(SM.createdAt) AS hour,
           SUM(total)         AS total,
@@ -18,10 +19,10 @@ export async function getDailySales(date = new Date()) {
           SaleDetail AS SD
             ON SM.id = SD.saleMasterId
         WHERE 
-          DATE(SM.createdAt) = "${date.toISOString().split("T")[0]}"
+          DATE(SM.createdAt) = ${date.toISOString().split("T")[0]}
         GROUP BY 
           HOUR(SM.createdAt)
-    `);
+    `;
 
   const hours = sales.map((sale) => {
 
@@ -100,7 +101,8 @@ export async function getSalesGrowth() {
 }
 
 export async function getMonthlySalesByCategory(){
-  const sales =  await prisma.$queryRawUnsafe(`
+  const sales =  await prisma.$queryRaw
+  `
         SELECT 
           C.\`name\` 			  AS category
           ,SUM(SM.total)		AS total
@@ -123,7 +125,7 @@ export async function getMonthlySalesByCategory(){
           MONTH(SM.createdAt) = MONTH(NOW())
         GROUP BY 
           C.\`name\`
-    `);
+    `;
 
     const categories = sales.map((sale) => sale.category);
     const totalSales = sales.map((sale) => sale.total);
@@ -138,7 +140,8 @@ export async function getMonthlySalesByCategory(){
 
 async function getSalesByMonth(startDate, endDate) {
 
-    return await prisma.$queryRawUnsafe(`
+    return await prisma.$queryRaw
+    `
         SELECT 
           MONTH(SM.createdAt) AS month,
           SUM(total)          AS total,
@@ -151,18 +154,19 @@ async function getSalesByMonth(startDate, endDate) {
         WHERE 
           SM.createdAt 
         BETWEEN 
-          "${startDate}"
+          ${startDate}
         AND 
-          "${endDate}"
+          ${endDate}
         GROUP BY 
           MONTH(SM.createdAt)
-    `);
+    `;
 
 }
 
 export async function getTopProducts() {
 
-  const result = await prisma.$queryRawUnsafe(`
+  const result = await prisma.$queryRaw
+  `
       SELECT
           D.name 		    AS Product
         , SUM(D.price)	AS TotalSales
@@ -177,7 +181,7 @@ export async function getTopProducts() {
       ORDER BY 
         TotalSales DESC
       LIMIT 4
-    `);
+    `;
 
     const productNames = result.map((item) => item.Product);
     const totalSales = result.map((item) => Number(item.TotalSales));
@@ -193,7 +197,8 @@ export async function getTopProducts() {
 
 export async function getDiscountsPerformance(){
   
-  const result = await prisma.$queryRawUnsafe(`
+  const result = await prisma.$queryRaw
+  `
     WITH CTE_DetailsCount AS 
     (
       SELECT 
@@ -219,7 +224,7 @@ export async function getDiscountsPerformance(){
     GROUP BY 
       D.description
 
-    `)
+    `;
 
   const discountNames = result.map((item) => item.Discount);
   const totalSales = result.map((item) => Number(item.TotalSales));

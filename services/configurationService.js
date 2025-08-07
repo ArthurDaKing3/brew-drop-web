@@ -9,7 +9,8 @@ export async function getConfigForTenant(tenant) {
 
     try{
 
-        const tenantData = await prisma.$queryRawUnsafe(`
+        const tenantData = await prisma.$queryRaw
+        `
             SELECT 
                 B.BusinessId,
                 B.BusinessName,
@@ -22,8 +23,8 @@ export async function getConfigForTenant(tenant) {
                 tb_BusinessesConfig AS BC
                     ON B.BusinessId = BC.BusinessId
             WHERE 
-                B.Subdomain = "${tenant}"
-        `);
+                B.Subdomain = ${tenant}
+        `;
 
         const configMap = {};
 
