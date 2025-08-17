@@ -23,7 +23,11 @@ export default async function handler(req, res) {
       break;
 
     case "PUT":
-      await updateDashboardLayout(req.body);
+      const request = JSON.parse(req.body);
+      const layout = JSON.stringify(request.layout);
+      const tenant = request.tenant;
+
+      await updateDashboardLayout(layout, tenant);
       break;
 
     default:
@@ -72,10 +76,10 @@ export default async function handler(req, res) {
     }
   }
 
-  async function updateDashboardLayout(newLayout){
+  async function updateDashboardLayout(newLayout, tenant){
 
     try{
-      const result = await updateActivityDashboardLayout(prismaConnection, newLayout);
+      const result = await updateActivityDashboardLayout(prismaConnection, newLayout, tenant);
 
       res.status(200).json({ message: "Dashboard layout updated successfully" });
     }

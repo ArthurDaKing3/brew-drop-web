@@ -1,17 +1,6 @@
 
 import { useEffect, useRef } from 'react';
-
-
-function arrayMove(arr, from, to) {
-  if (from === to) return arr;
-
-  const newArr = [...arr];
-  const [moved] = newArr.splice(from, 1);
-
-  newArr.splice(to, 0, moved);
-
-  return newArr;
-}
+import { arrayMove } from '../utils/utilites.js';
 
 
 export async function useSortable(listRef, setList, handleClass){

@@ -5,17 +5,16 @@ import { faPen, faChartPie, faChartLine, faChartSimple, faGaugeHigh } from '@for
 import { useEffect, useState, useRef } from "react";
 import { ChartContext } from '@/context/ChartContext';
 import { useChartContext } from "@/hooks/useChartContext";
+import { useTenantContext } from "@/hooks/useTenantContext";
 import ChartsCatalog from "@/config/charts/ChartsCatalog";
 
 
 
 const CustomizeDashboardButton = () => {
-    const {dashboardLayout, currentSection} = useChartContext();
 
+    const { dashboardLayout, currentSection } = useChartContext();
     const selectedCharts = dashboardLayout.find(s => s.SectionLabel == currentSection).SectionCharts;
-
     const chartsOrder = new Map(selectedCharts.map((name, i) => [name, i]));
-
     const initialCharts = [...ChartsCatalog]
                             .map(c => ({ 
                                 ...c, 
@@ -25,6 +24,8 @@ const CustomizeDashboardButton = () => {
                             .sort((a, b) => a.order - b.order);
 
     const [contextCharts, setContextCharts] = useState(initialCharts);
+
+    const { tenant } = useTenantContext();
 
     useEffect(() => {
 
@@ -46,11 +47,16 @@ const CustomizeDashboardButton = () => {
                 return section;
             });
 
+            const reqBody = {
+                layout: newLayout,
+                tenant: tenant,
+            };
+
             // HTTP Request to update the layout
             try{
 
-                const response = await fetch("/api/activity", {method: "PUT", body: JSON.stringify(newLayout)});
-                const result = await response.json();
+                const response  = await fetch("/api/activity", {method: "PUT", body: JSON.stringify(reqBody)});
+                const result    = await response.json();
 
                 if (!response.ok) throw new Error(result.message || "Unknown error");
                

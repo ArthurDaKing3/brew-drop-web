@@ -38,19 +38,22 @@ import CustomizeDashboardButton from "@/components/CustomizeDashboardButton";
 import ChartsCatalog            from "@/config/charts/ChartsCatalog";
 
 // Configuration
-import { getConfigForTenant } from "@/services/configurationService";
+import { getConfigForTenant }   from "@/services/configurationService";
 
 // Context
-import { ChartContext } from "@/context/ChartContext";
+import { ChartContext }         from "@/context/ChartContext";
+import { TenantContext }        from "@/context/TenantContext";
+
+// Utilities
+import { getTenantFromRequest } from "@/utils/utilites.js";
 
 export async function getServerSideProps({ req }) {
 
-    const host = req.headers.host;
-    const tenant = host?.split('.')[0] || 'default';
+    const tenant = getTenantFromRequest(req);
 
     try {
         const config = await getConfigForTenant(tenant);
-        return {props: { config }};
+        return {props: { tenant, config }};
     } 
     catch (error) {
         return {props: { config: {error: error.message} }};
@@ -58,10 +61,10 @@ export async function getServerSideProps({ req }) {
 
 }
 
-const activity = ({ config }) => {
+const activity = ({ tenant, config }) => {
 
     if(config.error) return ErrorAlert({ message: "Failed to load tenant configuration", details: config.error });
-    console.log("Tenant Config Loaded: ", config);
+    console.log(`Config Loaded for ${tenant}: `, config);
 
     const ActivityDashboardLayout = config.ActivityDashboardLayout;
     const { data, loading, error } = useAPIData("/api/activity", {method: "GET"});
@@ -70,95 +73,96 @@ const activity = ({ config }) => {
 
     return(
         <div>
-            
-            <Layout 
-                CurrentPage = {"Activity"}
-                SalesActivity = {
-                    <div className="activity-wrapper">
-                        
-                        <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Ventas" }}>
-                            <CustomizeDashboardButton />
-                        </ChartContext.Provider>
+            <TenantContext.Provider value={{ tenant }}>
+                <Layout 
+                    CurrentPage = {"Activity"}
+                    SalesActivity = {
+                        <div className="activity-wrapper">
+                            
+                            <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Ventas" }}>
+                                <CustomizeDashboardButton />
+                            </ChartContext.Provider>
 
-                        {
-                            ActivityDashboardLayout.find(s => s.SectionLabel == "Ventas").SectionCharts.map((chartName) => {
-                                
-                                if(loading) return <ChartSkeleton key={chartName} />;
+                            {
+                                ActivityDashboardLayout.find(s => s.SectionLabel == "Ventas").SectionCharts.map((chartName) => {
+                                    
+                                    if(loading) return <ChartSkeleton key={chartName} />;
 
-                                const chart = ChartsCatalog.find(c => c.chartName == chartName);
-                                const ChartComponent = chart.chartComponent;
-                                chart.chartData =  data[chartName]?.chartData;
+                                    const chart = ChartsCatalog.find(c => c.chartName == chartName);
+                                    const ChartComponent = chart.chartComponent;
+                                    chart.chartData =  data[chartName]?.chartData;
 
-                                return(
-                                    <ChartComponent
-                                        key={chartName}
-                                        data={chart.chartData}
-                                        options={chart.chartOptions}
-                                    />
-                                );
-                            })
+                                    return(
+                                        <ChartComponent
+                                            key={chartName}
+                                            data={chart.chartData}
+                                            options={chart.chartOptions}
+                                        />
+                                    );
+                                })
 
-                        }
-                    </div>
-                }
-                ProductsActivity={
-                    <div className="activity-wrapper">
+                            }
+                        </div>
+                    }
+                    ProductsActivity={
+                        <div className="activity-wrapper">
 
-                        <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Productos"  }}>
-                            <CustomizeDashboardButton />
-                        </ChartContext.Provider>
+                            <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Productos"  }}>
+                                <CustomizeDashboardButton />
+                            </ChartContext.Provider>
 
-                        {
-                            ActivityDashboardLayout.find(s => s.SectionLabel == "Productos").SectionCharts.map((chartName) => {
+                            {
+                                ActivityDashboardLayout.find(s => s.SectionLabel == "Productos").SectionCharts.map((chartName) => {
 
-                                if(loading) return <ChartSkeleton key={chartName} />;
+                                    if(loading) return <ChartSkeleton key={chartName} />;
 
-                                const chart = ChartsCatalog.find(c => c.chartName == chartName);
-                                const ChartComponent = chart.chartComponent;
-                                chart.chartData =  data[chartName]?.chartData;
+                                    const chart = ChartsCatalog.find(c => c.chartName == chartName);
+                                    const ChartComponent = chart.chartComponent;
+                                    chart.chartData =  data[chartName]?.chartData;
 
-                                return(
-                                    <ChartComponent
-                                        key={chartName}
-                                        data={chart.chartData}
-                                        options={chart.chartOptions}
-                                    />
-                                );
+                                    return(
+                                        <ChartComponent
+                                            key={chartName}
+                                            data={chart.chartData}
+                                            options={chart.chartOptions}
+                                        />
+                                    );
 
-                            })
+                                })
 
-                        }
-                    </div>
-                }
-                DiscountsActivity={
-                    <div className="activity-wrapper">
+                            }
+                        </div>
+                    }
+                    DiscountsActivity={
+                        <div className="activity-wrapper">
 
-                        <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Descuentos" }}>
-                            <CustomizeDashboardButton />
-                        </ChartContext.Provider>
+                            <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Descuentos" }}>
+                                <CustomizeDashboardButton />
+                            </ChartContext.Provider>
 
-                        {
-                            ActivityDashboardLayout.find(s => s.SectionLabel == "Descuentos").SectionCharts.map((chartName) => {
-                                
-                                if(loading) return <ChartSkeleton key={chartName} />;
+                            {
+                                ActivityDashboardLayout.find(s => s.SectionLabel == "Descuentos").SectionCharts.map((chartName) => {
+                                    
+                                    if(loading) return <ChartSkeleton key={chartName} />;
 
-                                const chart = ChartsCatalog.find(c => c.chartName == chartName);
-                                const ChartComponent = chart.chartComponent;
-                                chart.chartData =  data[chartName]?.chartData;
+                                    const chart = ChartsCatalog.find(c => c.chartName == chartName);
+                                    const ChartComponent = chart.chartComponent;
+                                    chart.chartData =  data[chartName]?.chartData;
 
-                                return(
-                                    <ChartComponent
-                                        key={chartName}
-                                        data={chart.chartData}
-                                        options={chart.chartOptions}
-                                    />
-                                );
-                            })
+                                    return(
+                                        <ChartComponent
+                                            key={chartName}
+                                            data={chart.chartData}
+                                            options={chart.chartOptions}
+                                        />
+                                    );
+                                })
 
-                        }
-                    </div>
-                }
-            />
+                            }
+                        </div>
+                    }
+                />
+            </TenantContext.Provider>
         </div>
     );
 }

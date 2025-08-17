@@ -237,8 +237,11 @@ export async function getDiscountsPerformance(prisma){
 
 }
 
-export async function updateActivityDashboardLayout(prisma, newLayout) {
-  console.log(newLayout);
+export async function updateActivityDashboardLayout(prisma, newLayout, tenant) {
+  
+  if (!tenant) 
+    throw new Error("Tenant is required to update dashboard layout");
+
   const result = await prisma.$queryRaw
   `
     UPDATE 
@@ -249,7 +252,7 @@ export async function updateActivityDashboardLayout(prisma, newLayout) {
     SET 
       BC.ConfigValue = ${newLayout}
     WHERE 
-      B.Subdomain = "localhost:3000";
+      B.Subdomain = ${tenant};
   `;
 
   return result;
