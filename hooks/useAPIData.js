@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function useAPIData(endpoint) {
+export default function useAPIData(endpoint, options = {}) {
 
     const [data, setData]       = useState(null);
     const [error, setError]     = useState(null);
@@ -10,7 +10,7 @@ export default function useAPIData(endpoint) {
         const fetchData = async () => {
             try {
 
-                const res = await fetch(endpoint);
+                const res = await fetch(endpoint, options);
                 const json = await res.json();
                 
                 if (!res.ok) {

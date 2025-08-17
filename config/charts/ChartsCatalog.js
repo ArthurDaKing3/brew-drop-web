@@ -24,45 +24,73 @@ import MonthlySalesByCategoryChart from "@/components/charts/MonthlySalesByCateg
 import TopSoldProductsChart from "@/components/charts/TopSoldProductsChart";
 import SalesGrowthChart from "@/components/charts/SalesGrowthChart";
 
+// Icons
+import { faTag, faTrophy, faChartPie, faChartLine, faChartSimple, faGaugeHigh } from '@fortawesome/free-solid-svg-icons'
 
-const ChartsCatalog = {
-    dailySales:  {
-        component: DailySalesChart,
+
+
+const ChartsCatalog = [
+    {
+        chartId: 1,
+        chartName: "dailySales",
+        chartDisplayName: "Ventas Diarias",
+        chartIcon: faChartSimple,
+        chartComponent: DailySalesChart,
+        chartOptions: dailySalesOptions,
         serviceFunction: getDailySales,
         formatData: formatDailySalesData,
-        options: dailySalesOptions,
     },
-    salesGrowth: {
-        component: SalesGrowthChart,
+    {
+        chartId: 2,
+        chartName: "salesGrowth",
+        chartDisplayName: "Crecimiento de Ventas",
+        chartIcon: faChartLine,
+        chartComponent: SalesGrowthChart,
+        chartOptions: salesGrowthOptions,
         serviceFunction: getSalesGrowth,
         formatData: formatSalesGrowthData,
-        options: salesGrowthOptions,
     },
-    topProducts: {
-        component: TopSoldProductsChart,
+    {
+        chartId: 3,
+        chartName: "topProducts",
+        chartDisplayName: "Productos Más Vendidos",
+        chartIcon: faTrophy,
+        chartComponent: TopSoldProductsChart,
+        chartOptions: topProductsOptions,
         serviceFunction: getTopProducts,
         formatData: formatTopProductsData,
-        options: topProductsOptions,
     },
-    monthlySales: {
-        component: MonthlySalesChart,
+    {
+        chartId: 4,
+        chartName: "monthlySales",
+        chartDisplayName: "Ventas Mensuales",
+        chartIcon: faGaugeHigh,
+        chartComponent: MonthlySalesChart,
+        chartOptions: monthlySalesOptions,
         serviceFunction: getMonthlySales,
         formatData: formatMonthlySalesData,
-        options: monthlySalesOptions,
     },
-    monthlySalesByCategory: {
-        component: MonthlySalesByCategoryChart,
+    {
+        chartId: 5,
+        chartName: "monthlySalesByCategory",
+        chartDisplayName: "Ventas Mensuales por Categoría",
+        chartIcon: faChartPie,
+        chartComponent: MonthlySalesByCategoryChart,
+        chartOptions: salesByCategoryOptions,
         serviceFunction: getMonthlySalesByCategory,
         formatData: formatSalesByCategoryData,
-        options: salesByCategoryOptions,
     },
-    discountsPerformance: {
-        component: DiscountsPerformanceChart,
+    {
+        chartId: 6,
+        chartName: "discountsPerformance",
+        chartDisplayName: "Desempeño de Descuentos",
+        chartIcon: faTag,
+        chartComponent: DiscountsPerformanceChart,
+        chartOptions: discountsPerformanceOptions,
         serviceFunction: getDiscountsPerformance,
         formatData: formatDiscountsPerformanceData,
-        options: discountsPerformanceOptions,
     },
     
-};
+];
 
 export default ChartsCatalog;

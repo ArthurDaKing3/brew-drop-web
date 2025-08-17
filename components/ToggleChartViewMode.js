@@ -1,3 +1,5 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMoneyBill, faCartShopping } from '@fortawesome/free-solid-svg-icons';
 
 const ToggleChartViewMode = ({handler, viewMode}) => {
     return(
@@ -6,7 +8,7 @@ const ToggleChartViewMode = ({handler, viewMode}) => {
                 onClick={() => handler(viewMode == "Ventas" ? "Unidades" : "Ventas")}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
             >
-                Métrico: {viewMode == "Ventas" ? "Unidades" : "Ventas"}
+                <FontAwesomeIcon icon={viewMode == "Ventas" ? faCartShopping : faMoneyBill} /> Métrico: {viewMode == "Ventas" ? "Unidades" : "Ventas"}
             </button>
         </div>
     );
