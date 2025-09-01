@@ -1,9 +1,8 @@
 {
-    "name": "Brew Drop",
-    "short_name": "brew-drop",
-    "description": "Point of sale of Brew Drop",
+    "name": "Dune n Dust",
+    "short_name": "dune-n-dust",
+    "description": "Point of sale of Dune n Dust",
     "start_url": "/",
-    "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#ffffff",
     "icons": [
