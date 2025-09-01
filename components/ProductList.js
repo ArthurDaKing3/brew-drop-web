@@ -70,11 +70,11 @@ const ProductList = ({products, categories, addItemToCart = () => {}, enabled, c
                               </div>
                                 <span className="icon-wrapper">
                                   {!enabled && <img className="icon" src="./assets/coffee.png" alt="Size"/>}
-                                  {!enabled && sizes.find(s=>s.id == product.size).name}
+                                  {!enabled && sizes.find(s => s.id == product.size)?.name}
                                 </span>
                                 <span className="icon-wrapper">
                                   {!enabled && <img className="icon" src="./assets/milk.png" alt="Size"/>}
-                                  {!enabled && milks.find(m => m.id == product.milk).name}
+                                  {!enabled && milks.find(m => m.id == product.milk)?.name}
                                 </span>
                             </div>
                           } />

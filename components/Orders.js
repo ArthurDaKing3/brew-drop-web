@@ -101,7 +101,7 @@ const Orders = ({orders, setOrders, sizes, milks}) => {
                                     </span>
                                 </button>
                                 </h2>
-                                <div id={`collapse${o.id}`} class="accordion-collapse collapse" aria-labelledby={`heading${o.id}`}>
+                                <div id={`collapse${o.id}`} className="accordion-collapse collapse" aria-labelledby={`heading${o.id}`}>
                                     <div className="accordion-body">
                                         <div className="order-wrapper">
                                             <ProductList 

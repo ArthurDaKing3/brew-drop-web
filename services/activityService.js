@@ -1,25 +1,11 @@
 import { subMonths, startOfMonth, endOfMonth, format } from "date-fns";
+import { getLocalDateString } from "@/utils/utilites.js"; 
+import ExecuteSP from "./prismaService";
 
-export async function getDailySales(prisma) {
+export async function getDailySales(prisma, tenant) {
 
-  const date  = new Date();
-  const sales = await prisma.$queryRaw 
-  `
-    SELECT 
-      HOUR(SM.createdAt) AS hour,
-      SUM(total)         AS total,
-      SUM(quantity)      AS quantity
-    FROM 
-      SaleMaster AS SM
-    INNER JOIN 
-      SaleDetail AS SD
-        ON SM.id = SD.saleMasterId
-    WHERE 
-      DATE(SM.createdAt) = ${date.toISOString().split("T")[0]}
-    GROUP BY 
-      HOUR(SM.createdAt)
-  `;
-
+  const sales = await ExecuteSP(prisma, "sp_GetDailySales", [tenant, getLocalDateString()], ['hour', 'total', 'quantity']);
+  
   const hours = sales.map((sale) => {
 
     const hour = Number(sale.hour);
@@ -40,13 +26,13 @@ export async function getDailySales(prisma) {
 
 }
 
-export async function getMonthlySales(prisma) {
+export async function getMonthlySales(prisma, tenant) {
 
   const date       = new Date();
-  const monthStart = startOfMonth(date).toISOString();
-  const monthEnd   = endOfMonth(date).toISOString();
+  const monthStart = getLocalDateString(startOfMonth(date));
+  const monthEnd   = getLocalDateString(endOfMonth(date));
 
-  const sales = await getSalesByMonth(prisma, monthStart, monthEnd);
+  const sales = await getSalesByMonth(prisma, tenant, monthStart, monthEnd);
 
   const monthlySales     = sales.reduce((sum, sale) => sum + Number(sale.total), 0);
   const monthlyUnitsSold = sales.reduce((sum, sale) => sum + Number(sale.quantity), 0);
@@ -57,7 +43,7 @@ export async function getMonthlySales(prisma) {
 
 }
 
-export async function getSalesGrowth(prisma) {
+export async function getSalesGrowth(prisma, tenant) {
 
   const now = new Date();
   const months = [];
@@ -78,8 +64,8 @@ export async function getSalesGrowth(prisma) {
   const units = [];
 
   for (const month of months) {
-    
-    const result = await getSalesByMonth(prisma, month.start.toISOString(), month.end.toISOString());
+
+    const result = await getSalesByMonth(prisma, tenant, getLocalDateString(month.start), getLocalDateString(month.end));
 
     const total = result.reduce((acc, sale) => acc + Number(sale.total), 0);
     const quantity = result.reduce((acc, sale) => acc + Number(sale.quantity), 0);
@@ -97,33 +83,9 @@ export async function getSalesGrowth(prisma) {
 
 }
 
-export async function getMonthlySalesByCategory(prisma){
+export async function getMonthlySalesByCategory(prisma, tenant){
 
-  const sales =  await prisma.$queryRaw
-  `
-    SELECT 
-      C.\`name\` 			  AS category
-      ,SUM(SM.total)		AS total
-      ,SUM(SD.quantity)	AS quantity
-    FROM  
-      SaleMaster 			  AS SM
-    INNER JOIN 
-      SaleDetail 			  AS SD
-        ON SM.id = SD.saleMasterId
-    INNER JOIN 
-      Drink 				    AS D
-        ON SD.drinkId = D.id
-    INNER JOIN 
-      _CategoryToDrink 	AS CTD
-            ON D.id = CTD.B
-    INNER JOIN 
-      Category 			    AS C
-        ON CTD.A = C.id
-    WHERE 
-      MONTH(SM.createdAt) = MONTH(NOW())
-    GROUP BY 
-      C.\`name\`
-  `;
+  const sales = await ExecuteSP(prisma, "sp_GetMonthlySalesByCategory", [tenant], ['category', 'total', 'quantity']);
 
   const categories = sales.map((sale) => sale.category);
   const totalSales = sales.map((sale) => sale.total);
@@ -137,50 +99,15 @@ export async function getMonthlySalesByCategory(prisma){
 
 }
 
-async function getSalesByMonth(prisma, startDate, endDate) {
+async function getSalesByMonth(prisma, tenant, startDate, endDate) {
 
-  return await prisma.$queryRaw
-  `
-      SELECT 
-        MONTH(SM.createdAt) AS month,
-        SUM(total)          AS total,
-        SUM(quantity)       AS quantity
-      FROM 
-        SaleMaster	AS SM
-      INNER JOIN 
-        SaleDetail  AS SD
-          ON SM.id = SD.saleMasterId
-      WHERE 
-        SM.createdAt 
-      BETWEEN 
-        ${startDate}
-      AND 
-        ${endDate}
-      GROUP BY 
-        MONTH(SM.createdAt)
-  `;
+  return await ExecuteSP(prisma, "sp_GetSalesByMonth", [tenant, startDate, endDate], ['month', 'total', 'quantity']);
 
 }
 
-export async function getTopProducts(prisma) {
+export async function getTopProducts(prisma, tenant) {
 
-  const result = await prisma.$queryRaw
-  `
-    SELECT
-        D.name 		    AS Product
-      , SUM(D.price)	AS TotalSales
-      , SUM(quantity) AS TotalUnits
-    FROM 
-      SaleDetail 	AS SD
-    INNER JOIN 	
-      Drink 		  AS D
-        ON SD.drinkId = D.id
-    GROUP BY 
-      D.name
-    ORDER BY 
-      TotalSales DESC
-    LIMIT 4
-  `;
+  const result = await ExecuteSP(prisma, "sp_GetTopProducts", [tenant], ['Product', 'TotalSales', 'TotalUnits']);
 
   const productNames = result.map((item) => item.Product);
   const totalSales = result.map((item) => Number(item.TotalSales));
@@ -194,36 +121,9 @@ export async function getTopProducts(prisma) {
 
 }
 
-export async function getDiscountsPerformance(prisma){
-  
-  const result = await prisma.$queryRaw
-  `
-    WITH CTE_DetailsCount AS 
-    (
-      SELECT 
-         saleMasterId
-        ,SUM(quantity) AS Quantity
-      FROM 
-        SaleDetail
-      GROUP BY 
-        saleMasterId
-    )
-    SELECT 
-       CONCAT(D.description, ' (', D.percentage, '%)')		AS Discount
-      ,SUM(SM.total)		AS TotalSales
-      ,SUM(DC.Quantity)	AS TotalUnits
-    FROM  
-      SaleMaster 			AS SM
-    INNER JOIN 
-      Discount 			AS D
-        ON SM.discountId = D.id
-    INNER JOIN 	
-      CTE_DetailsCount 	AS DC
-        ON SM.id = DC.saleMasterId
-    GROUP BY 
-      D.description
+export async function getDiscountsPerformance(prisma, tenant){
 
-  `;
+  const result = await ExecuteSP(prisma, "sp_GetDiscountsPerformance", [tenant], ['Discount', 'TotalSales', 'TotalUnits']);
 
   const discountNames = result.map((item) => item.Discount);
   const totalSales = result.map((item) => Number(item.TotalSales));
@@ -242,18 +142,7 @@ export async function updateActivityDashboardLayout(prisma, newLayout, tenant) {
   if (!tenant) 
     throw new Error("Tenant is required to update dashboard layout");
 
-  const result = await prisma.$queryRaw
-  `
-    UPDATE 
-      tb_BusinessesConfig AS BC
-    INNER JOIN 
-      tb_BusinessesCatalog AS B
-          ON B.BusinessId = BC.BusinessId
-    SET 
-      BC.ConfigValue = ${newLayout}
-    WHERE 
-      B.Subdomain = ${tenant};
-  `;
+  const result = await ExecuteSP(prisma, "sp_UpdActivityDashboardLayout", [tenant, newLayout]);
 
   return result;
 

@@ -6,23 +6,47 @@ import ProductList from "@/components/ProductList";
 import Checkout from "@/components/Checkout";
 import Orders from "@/components/Orders"
 import { PrismaClient } from '@prisma/client'
+import { getTenantFromRequest } from "@/utils/utilites";
 
-export async function getServerSideProps(){
+export async function getServerSideProps({ req }){
     const prisma        = new PrismaClient({
     });
-    
-    const categories    = await prisma.category.findMany();
-    const discounts     = await prisma.discount.findMany();
-    const sizes         = await prisma.size.findMany();
-    const milkTypes     = await prisma.milkType.findMany();
-    const drinks        = await prisma.drink.findMany({
+
+    const tenant = getTenantFromRequest(req);
+
+    const businessRecord = await prisma.tb_BusinessesCatalog.findFirst({
+        where: { Subdomain: tenant }
+    });
+
+    const businessId = businessRecord.BusinessId;
+
+    const categories = await prisma.category.findMany({
+        where: { BusinessId: businessId }
+    });
+
+    const discounts = await prisma.discount.findMany({
+        where: { BusinessId: businessId }
+    });
+
+    const sizes = await prisma.size.findMany({
+        where: { BusinessId: businessId }
+    });
+
+    const milkTypes = await prisma.milkType.findMany({
+        where: { BusinessId: businessId }
+    });
+
+    const drinks = await prisma.drink.findMany({
+        where: { BusinessId: businessId },
         include:{
             categories : {select: {name: true}}
         }
     }); 
+
     const salesMaster   = await prisma.saleMaster.findMany({
         where:{
-            completed: false
+            completed: false,
+            BusinessId: businessId
         },
         include:{
             saleDetail: {
@@ -114,7 +138,7 @@ export async function getServerSideProps(){
             discounts:  sDiscounts,
             sizes:      sSizes,
             milks:      sMilkTypes,
-            sales:     sSalesMaster,
+            sales:      sSalesMaster,
         }
     })
 }
@@ -182,7 +206,7 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
         })
 
         Swal.fire({
-            title: 'Detalles de la Bebida',
+            title: 'Detalles del producto',
             html:
             `
             <div class="details-info">
@@ -239,9 +263,8 @@ const Sell = ({drinks, categories, discounts, sizes, milks, sales})=>{
                 if(qty == 0) error  = "Selecciona una cantidad";
                 if(size == 0) error = "Selecciona un tamaño";
                 if(milk == 0) error = "Selecciona un tipo de leche";
-                if(tempValue == "") error = "Selecciona si la bebida es fria o caliente";
 
-                if (qty == 0 || size == 0 || milk == 0 || tempValue == "") {
+                if (qty == 0 || size == 0 || milk == 0) {
                     Swal.showValidationMessage(error);
                 }
             }

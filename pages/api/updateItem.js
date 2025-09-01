@@ -9,9 +9,6 @@ export default async function handler(req, res){
         try{
             const { type, items } = req.body;
 
-            console.log(type);
-            console.log(items);
-
             const data = {};
             switch(type){
                 case "product":

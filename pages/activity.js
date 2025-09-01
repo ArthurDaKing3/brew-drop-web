@@ -67,102 +67,100 @@ const activity = ({ tenant, config }) => {
     console.log(`Config Loaded for ${tenant}: `, config);
 
     const ActivityDashboardLayout = config.ActivityDashboardLayout;
-    const { data, loading, error } = useAPIData("/api/activity", {method: "GET"});
+    const { data, loading, error } = useAPIData("/api/activity", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentLayout: ActivityDashboardLayout }) });
 
     if (error) return ErrorAlert({ message: "Failed to load activity data", details: error });
 
     return(
         <div>
-            <TenantContext.Provider value={{ tenant }}>
-                <Layout 
-                    CurrentPage = {"Activity"}
-                    SalesActivity = {
-                        <div className="activity-wrapper">
-                            
-                            <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Ventas" }}>
-                                <CustomizeDashboardButton />
-                            </ChartContext.Provider>
+            <Layout 
+                CurrentPage = {"Activity"}
+                SalesActivity = {
+                    <div className="activity-wrapper">
+                        
+                        <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Ventas" }}>
+                            <CustomizeDashboardButton />
+                        </ChartContext.Provider>
 
-                            {
-                                ActivityDashboardLayout.find(s => s.SectionLabel == "Ventas").SectionCharts.map((chartName) => {
-                                    
-                                    if(loading) return <ChartSkeleton key={chartName} />;
+                        {
+                            ActivityDashboardLayout.find(s => s.SectionLabel == "Ventas").SectionCharts.map((chartName) => {
+                                
+                                if(loading) return <ChartSkeleton key={chartName} />;
 
-                                    const chart = ChartsCatalog.find(c => c.chartName == chartName);
-                                    const ChartComponent = chart.chartComponent;
-                                    chart.chartData =  data[chartName]?.chartData;
+                                const chart = ChartsCatalog.find(c => c.chartName == chartName);
+                                const ChartComponent = chart.chartComponent;
+                                chart.chartData =  data[chartName]?.chartData;
 
-                                    return(
-                                        <ChartComponent
-                                            key={chartName}
-                                            data={chart.chartData}
-                                            options={chart.chartOptions}
-                                        />
-                                    );
-                                })
+                                return(
+                                    <ChartComponent
+                                        key={chartName}
+                                        data={chart.chartData}
+                                        options={chart.chartOptions}
+                                    />
+                                );
+                            })
 
-                            }
-                        </div>
-                    }
-                    ProductsActivity={
-                        <div className="activity-wrapper">
+                        }
+                    </div>
+                }
+                ProductsActivity={
+                    <div className="activity-wrapper">
 
-                            <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Productos"  }}>
-                                <CustomizeDashboardButton />
-                            </ChartContext.Provider>
+                        <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Productos"  }}>
+                            <CustomizeDashboardButton />
+                        </ChartContext.Provider>
 
-                            {
-                                ActivityDashboardLayout.find(s => s.SectionLabel == "Productos").SectionCharts.map((chartName) => {
+                        {
+                            ActivityDashboardLayout.find(s => s.SectionLabel == "Productos").SectionCharts.map((chartName) => {
 
-                                    if(loading) return <ChartSkeleton key={chartName} />;
+                                if(loading) return <ChartSkeleton key={chartName} />;
 
-                                    const chart = ChartsCatalog.find(c => c.chartName == chartName);
-                                    const ChartComponent = chart.chartComponent;
-                                    chart.chartData =  data[chartName]?.chartData;
+                                const chart = ChartsCatalog.find(c => c.chartName == chartName);
+                                const ChartComponent = chart.chartComponent;
+                                chart.chartData =  data[chartName]?.chartData;
 
-                                    return(
-                                        <ChartComponent
-                                            key={chartName}
-                                            data={chart.chartData}
-                                            options={chart.chartOptions}
-                                        />
-                                    );
+                                return(
+                                    <ChartComponent
+                                        key={chartName}
+                                        data={chart.chartData}
+                                        options={chart.chartOptions}
+                                    />
+                                );
 
-                                })
+                            })
 
-                            }
-                        </div>
-                    }
-                    DiscountsActivity={
-                        <div className="activity-wrapper">
+                        }
+                    </div>
+                }
+                DiscountsActivity={
+                    <div className="activity-wrapper">
 
-                            <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Descuentos" }}>
-                                <CustomizeDashboardButton />
-                            </ChartContext.Provider>
+                        <ChartContext.Provider value={{ dashboardLayout: ActivityDashboardLayout, currentSection: "Descuentos" }}>
+                            <CustomizeDashboardButton />
+                        </ChartContext.Provider>
 
-                            {
-                                ActivityDashboardLayout.find(s => s.SectionLabel == "Descuentos").SectionCharts.map((chartName) => {
-                                    
-                                    if(loading) return <ChartSkeleton key={chartName} />;
+                        {
+                            ActivityDashboardLayout.find(s => s.SectionLabel == "Descuentos").SectionCharts.map((chartName) => {
+                                
+                                if(loading) return <ChartSkeleton key={chartName} />;
 
-                                    const chart = ChartsCatalog.find(c => c.chartName == chartName);
-                                    const ChartComponent = chart.chartComponent;
-                                    chart.chartData =  data[chartName]?.chartData;
+                                const chart = ChartsCatalog.find(c => c.chartName == chartName);
+                                const ChartComponent = chart.chartComponent;
+                                chart.chartData =  data[chartName]?.chartData;
 
-                                    return(
-                                        <ChartComponent
-                                            key={chartName}
-                                            data={chart.chartData}
-                                            options={chart.chartOptions}
-                                        />
-                                    );
-                                })
+                                return(
+                                    <ChartComponent
+                                        key={chartName}
+                                        data={chart.chartData}
+                                        options={chart.chartOptions}
+                                    />
+                                );
+                            })
 
-                            }
-                        </div>
-                    }
-                />
-            </TenantContext.Provider>
+                        }
+                    </div>
+                }
+            />
         </div>
     );
 }

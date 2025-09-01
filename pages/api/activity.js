@@ -1,52 +1,47 @@
 import ChartsCatalog from "@/config/charts/ChartsCatalog";
 import { PrismaClient } from "@prisma/client";
 import { updateActivityDashboardLayout } from "@/services/activityService";
+import { getTenantFromRequest } from "@/utils/utilites";
+
 const prismaConnection = new PrismaClient({
     log: ['info', 'warn', 'error']
 });
 
 export default async function handler(req, res) {
 
-  // Placeholder, this will be replaced with database info 
-  const ActivityDashboardLayout = [
-    "dailySales",
-    "salesGrowth",
-    "topProducts",
-    "monthlySales",
-    "discountsPerformance",
-    "monthlySalesByCategory",
-  ]
+  const tenant = getTenantFromRequest(req);
 
   switch(req.method){
-    case "GET":
-      await getActivityData();
+
+    case "POST":
+      const currentLayout  = req.body.currentLayout;
+      const selectedCharts = currentLayout.flatMap(section => section.SectionCharts);
+
+      await getActivityData(tenant, selectedCharts);
       break;
 
     case "PUT":
-      const request = JSON.parse(req.body);
-      const layout = JSON.stringify(request.layout);
-      const tenant = request.tenant;
-
-      await updateDashboardLayout(layout, tenant);
+      await updateDashboardLayout(req.body, tenant);
       break;
 
     default:
         res.status(405).end(`Method ${req.method} Not Allowed`);
       break;
+
   }
 
-  async function getActivityData(){
+  async function getActivityData(tenant, selectedCharts){
     try {
       
       const resultEntries = await Promise.all(
-        ActivityDashboardLayout.map(async (chart) => {
+        selectedCharts.map(async (chart) => {
 
             const chartCatalog = ChartsCatalog.find(c => c.chartName == chart);
 
             const getChartInformation = chartCatalog.serviceFunction;
             if (!getChartInformation) return [chartCatalog.chartName, null];
 
-            const rawInformation = await getChartInformation(prismaConnection);
+            const rawInformation = await getChartInformation(prismaConnection, tenant);
             const formattedData = chartCatalog.formatData(rawInformation);
             
             const result = {

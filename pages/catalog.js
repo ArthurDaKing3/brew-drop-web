@@ -1,52 +1,18 @@
 import Layout from "../components/Layout";
 import ProductList from "@/components/ProductList"
 import Form from "@/components/Form"
-import { PrismaClient } from '@prisma/client'
-import { useState } from "react";
+
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "antd";
 
-export async function getServerSideProps(){
-    const prisma = new PrismaClient();
+import useAPIData from "@/hooks/useAPIData";
 
-    const categories    = await prisma.category.findMany();
-    const sCategories   = categories.map(c => ({
-        ...c,
-        checked: false,
-        createdAt: c.createdAt.toISOString(),
-        updatedAt: c.updatedAt ? c.updatedAt.toISOString() : ""
-      }));
+import ErrorAlert from "../components/ErrorAlert";
+import SkeletonList from "../components/SkeletonList";
 
-    const drinks        = await prisma.drink.findMany({
-        include:{
-            categories : {select: {name: true}}
-        }
-    }); 
-    const sDrinks       = drinks.map(d => ({
-        ...d,
-        categories: d.categories.map(c => c.name),
-        createdAt: d.createdAt.toISOString(),
-        updatedAt: d.updatedAt ? d.updatedAt.toISOString() : ""
-    }));
 
-    const discounts     = await prisma.discount.findMany();
-    const sDiscounts    = discounts.map(d => ({
-        ...d,
-        createdAt: d.createdAt.toISOString(),
-        updatedAt: d.updatedAt ? d.updatedAt.toISOString() : ""
-    }));
-
-    return({
-        props:{
-            categories: sCategories,
-            drinks:     sDrinks,
-            discounts:  sDiscounts,
-        }
-    })
-}
-
-const Catalog = ({categories, drinks, discounts})=>{
-
-    const productInitialConfig  = {
+const buildProductInitialConfig = (categories, addItem) => (
+    {
         formTitle: 'Agregar Producto',
         formType: 'product',
         sections: [
@@ -71,13 +37,13 @@ const Catalog = ({categories, drinks, discounts})=>{
                         id: 'productCategories',
                         type: 'accordion',
                         label: 'Categorias',
-                        items: categories,
+                        items: categories || [],
                         itemsType: 'checkbox',
                         selectedItems: [],
                         action: () => console.log("action"),
                         required: true,
                     },
-                ]
+                ]           
             },
             {
                 sectionTitle: 'Imagen',
@@ -96,8 +62,10 @@ const Catalog = ({categories, drinks, discounts})=>{
             action: addItem,
         }
     }
+);
 
-    const categoryInitialConfig = {
+const buildCategoryInitialConfig = (addItem) => (
+    {
         formTitle: 'Agregar Categoría',
         formType: 'category',
         sections: [
@@ -130,8 +98,10 @@ const Catalog = ({categories, drinks, discounts})=>{
             action: addItem,
         }
     }
+);
 
-    const discountInitialConfig = {
+const buildDiscountInitialConfig = (addItem) => (
+    {
         formTitle: 'Agregar Descuento',
         formType: 'discount',
         sections: [
@@ -161,14 +131,36 @@ const Catalog = ({categories, drinks, discounts})=>{
             action: addItem,
         }
     }
+);
+
+
+const Catalog = () => {
+
+    const { data, loading, error } = useAPIData("/api/catalog", { method: 'GET' });
+
+    const { categories, drinks, discounts } = data || {};
+
+    
+    const productInitialConfig = useMemo(
+        () => buildProductInitialConfig(categories, addItem),
+        [categories, addItem]
+    );
+
 
     const [productConfig, setProductConfig]     = useState(productInitialConfig);
 
-    const [categoryConfig, setCategoryConfig]   = useState(categoryInitialConfig);
+    const [categoryConfig, setCategoryConfig]   = useState(buildCategoryInitialConfig(addItem));
 
-    const [discountConfig, setDiscountConfig]   = useState(discountInitialConfig);
+    const [discountConfig, setDiscountConfig]   = useState(buildDiscountInitialConfig(addItem));
 
     const [showUpdateForm, setShowUpdateForm]   = useState(false);
+
+
+    useEffect(() => {
+        if (!loading && categories) setProductConfig(productInitialConfig);
+        
+    }, [categories]);
+
 
     const inputTypes = [
         {text: 'in_'},
@@ -472,11 +464,11 @@ const Catalog = ({categories, drinks, discounts})=>{
                 break;
 
             case "category":
-                setCategoryConfig(categoryInitialConfig);
+                setCategoryConfig(buildCategoryInitialConfig(addItem));
                 break;
 
             case "discount":
-                setDiscountConfig(discountInitialConfig);
+                setDiscountConfig(buildDiscountInitialConfig(addItem));
                 break;
             
             default: 
@@ -495,11 +487,11 @@ const Catalog = ({categories, drinks, discounts})=>{
                 break;
 
             case "category":
-                inputValues = getInputValues(categoryInitialConfig)
+                inputValues = getInputValues(buildCategoryInitialConfig(addItem))
                 break;
 
             case "discount":
-                inputValues = getInputValues(discountInitialConfig)
+                inputValues = getInputValues(buildDiscountInitialConfig(addItem))
                 break;
 
             default: 
@@ -550,6 +542,12 @@ const Catalog = ({categories, drinks, discounts})=>{
                     return;
             }
         }
+        else{
+            inputValues = {
+                ...inputValues,
+                image: "",
+            };
+        }
 
         Swal.fire({
             title: 'Agregando...',
@@ -560,6 +558,7 @@ const Catalog = ({categories, drinks, discounts})=>{
         })
 
         try{
+
             const response = await fetch('/api/addItem', {
                 method: 'POST',
                 headers: {
@@ -646,6 +645,8 @@ const Catalog = ({categories, drinks, discounts})=>{
     }
 
     function updateConfigInput(sectionType, sectionIndex, inputType, newValue){
+
+        
         switch(sectionType){
             case "product":
                 setProductConfig((prevConfig) => {
@@ -733,6 +734,8 @@ const Catalog = ({categories, drinks, discounts})=>{
         }
     }
 
+    if (error) return ErrorAlert({ message: "Failed to load catalogs data", details: error });
+
     return(
         <div>
             <Layout 
@@ -755,11 +758,18 @@ const Catalog = ({categories, drinks, discounts})=>{
                                 Nuevo
                             </Button>
                         </div>
-                        <ProductList 
-                            isProduct   = { true }
-                            products    = { drinks } 
-                            enabled     = { true } 
-                            actions     = { [{icon: './assets/edit.png', action: updateItem}] }/>
+                        {
+                            loading 
+                            ?
+                                <SkeletonList />
+                            :
+                                <ProductList 
+                                    isProduct   = { true }
+                                    products    = { drinks } 
+                                    enabled     = { true } 
+                                    actions     = { [{icon: './assets/edit.png', action: updateItem}] }
+                                />
+                        }
                     </div>
                 }
                 ContentCategories={

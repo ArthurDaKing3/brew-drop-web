@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 
+/**
+ * Custom hook to fetch data from a REST API endpoint
+ * @param {string}  endpoint  - The API endpoint to call
+ * @param {Object}  options   - Options for the API call
+ */
 export default function useAPIData(endpoint, options = {}) {
 
     const [data, setData]       = useState(null);
@@ -10,7 +15,7 @@ export default function useAPIData(endpoint, options = {}) {
         const fetchData = async () => {
             try {
 
-                const res = await fetch(endpoint, options);
+                const res  = await fetch(endpoint, options);
                 const json = await res.json();
                 
                 if (!res.ok) {
@@ -22,7 +27,6 @@ export default function useAPIData(endpoint, options = {}) {
             } catch (error) {
 
                 setError(error.message);
-                console.error("Error en useAPIData:", error);
 
             } finally {
 

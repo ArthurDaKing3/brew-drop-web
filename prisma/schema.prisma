@@ -8,37 +8,48 @@ datasource db {
 }
 
 model Drink {
-  id          Int          @id @default(autoincrement())
-  name        String       @db.VarChar(50)
-  image       String?      @db.VarChar(200)
-  price       Int
-  createdAt   DateTime     @default(now()) @db.DateTime(0)
-  updatedAt   DateTime?    @updatedAt @db.DateTime(0)
-  salesDetail SaleDetail[]
-  categories  Category[]   @relation("CategoryToDrink")
+  id                   Int                   @id @default(autoincrement())
+  name                 String                @db.VarChar(50)
+  image                String?               @db.VarChar(200)
+  price                Int
+  createdAt            DateTime              @default(now()) @db.DateTime(0)
+  updatedAt            DateTime?             @updatedAt @db.DateTime(0)
+  BusinessId           Int?
+  tb_BusinessesCatalog tb_BusinessesCatalog? @relation(fields: [BusinessId], references: [BusinessId], onDelete: NoAction, onUpdate: NoAction, map: "fk_Drink_Business")
+  salesDetail          SaleDetail[]
+  categories           Category[]            @relation("CategoryToDrink")
+
+  @@index([BusinessId], map: "fk_Drink_Business")
 }
 
 model Category {
-  id        Int       @id @default(autoincrement())
-  name      String    @db.VarChar(50)
-  createdAt DateTime  @default(now()) @db.DateTime(0)
-  updatedAt DateTime? @updatedAt @db.DateTime(0)
-  image     String?   @db.VarChar(200)
-  drinks    Drink[]   @relation("CategoryToDrink")
+  id                   Int                  @id @default(autoincrement())
+  name                 String               @db.VarChar(50)
+  createdAt            DateTime             @default(now()) @db.DateTime(0)
+  updatedAt            DateTime?            @updatedAt @db.DateTime(0)
+  image                String?              @db.VarChar(200)
+  BusinessId           Int
+  tb_BusinessesCatalog tb_BusinessesCatalog @relation(fields: [BusinessId], references: [BusinessId], onDelete: NoAction, onUpdate: NoAction, map: "Category_ibfk_1")
+  drinks               Drink[]              @relation("CategoryToDrink")
+
+  @@index([BusinessId], map: "BusinessId")
 }
 
 model SaleMaster {
-  id         Int          @id @default(autoincrement())
-  total      Int
-  payment    String       @default("Efectivo") @db.VarChar(50)
-  discountId Int?
-  createdAt  DateTime     @default(now()) @db.DateTime(0)
-  updatedAt  DateTime?    @updatedAt @db.DateTime(0)
-  completed  Boolean?     @default(false)
-  saleDetail SaleDetail[]
-  discount   Discount?    @relation(fields: [discountId], references: [id])
+  id                   Int                   @id @default(autoincrement())
+  total                Int
+  payment              String                @default("Efectivo") @db.VarChar(50)
+  discountId           Int?
+  createdAt            DateTime              @default(now()) @db.DateTime(0)
+  updatedAt            DateTime?             @updatedAt @db.DateTime(0)
+  completed            Boolean?              @default(false)
+  BusinessId           Int?
+  saleDetail           SaleDetail[]
+  discount             Discount?             @relation(fields: [discountId], references: [id])
+  tb_BusinessesCatalog tb_BusinessesCatalog? @relation(fields: [BusinessId], references: [BusinessId], onDelete: NoAction, onUpdate: NoAction, map: "fk_SaleMaster_Business")
 
   @@index([discountId], map: "SaleMaster_discountId_fkey")
+  @@index([BusinessId], map: "fk_SaleMaster_Business")
 }
 
 model SaleDetail {
@@ -63,28 +74,64 @@ model SaleDetail {
 }
 
 model MilkType {
-  id        Int          @id @default(autoincrement())
-  name      String       @db.VarChar(50)
-  price     Int
-  createdAt DateTime     @default(now()) @db.DateTime(0)
-  updatedAt DateTime?    @updatedAt @db.DateTime(0)
-  sales     SaleDetail[]
+  id                   Int                  @id @default(autoincrement())
+  name                 String               @db.VarChar(50)
+  price                Int
+  createdAt            DateTime             @default(now()) @db.DateTime(0)
+  updatedAt            DateTime?            @updatedAt @db.DateTime(0)
+  BusinessId           Int
+  tb_BusinessesCatalog tb_BusinessesCatalog @relation(fields: [BusinessId], references: [BusinessId], onDelete: NoAction, onUpdate: NoAction, map: "MilkType_ibfk_1")
+  sales                SaleDetail[]
+
+  @@index([BusinessId], map: "BusinessId")
 }
 
 model Size {
-  id              Int          @id @default(autoincrement())
-  name            String       @db.VarChar(50)
-  priceMultiplier Int
-  createdAt       DateTime     @default(now()) @db.DateTime(0)
-  updatedAt       DateTime?    @updatedAt @db.DateTime(0)
-  sales           SaleDetail[]
+  id                   Int                  @id @default(autoincrement())
+  name                 String               @db.VarChar(50)
+  priceMultiplier      Int
+  createdAt            DateTime             @default(now()) @db.DateTime(0)
+  updatedAt            DateTime?            @updatedAt @db.DateTime(0)
+  BusinessId           Int
+  sales                SaleDetail[]
+  tb_BusinessesCatalog tb_BusinessesCatalog @relation(fields: [BusinessId], references: [BusinessId], onDelete: NoAction, onUpdate: NoAction, map: "Size_ibfk_1")
+
+  @@index([BusinessId], map: "BusinessId")
 }
 
 model Discount {
-  id          Int          @id @default(autoincrement())
-  description String       @db.VarChar(50)
-  percentage  Int
-  createdAt   DateTime     @default(now()) @db.DateTime(0)
-  updatedAt   DateTime?    @updatedAt @db.DateTime(0)
-  sales       SaleMaster[]
+  id                   Int                   @id @default(autoincrement())
+  description          String                @db.VarChar(50)
+  percentage           Int
+  createdAt            DateTime              @default(now()) @db.DateTime(0)
+  updatedAt            DateTime?             @updatedAt @db.DateTime(0)
+  BusinessId           Int?
+  tb_BusinessesCatalog tb_BusinessesCatalog? @relation(fields: [BusinessId], references: [BusinessId], onDelete: NoAction, onUpdate: NoAction, map: "Discount_ibfk_1")
+  sales                SaleMaster[]
+
+  @@index([BusinessId], map: "BusinessId")
+}
+
+model tb_BusinessesCatalog {
+  BusinessId          Int                   @id @default(autoincrement())
+  BusinessName        String                @db.VarChar(100)
+  Subdomain           String                @unique(map: "Subdomain") @db.VarChar(50)
+  CreatedAt           DateTime?             @default(now()) @db.DateTime(0)
+  Category            Category[]
+  Discount            Discount[]
+  Drink               Drink[]
+  MilkType            MilkType[]
+  SaleMaster          SaleMaster[]
+  Size                Size[]
+  tb_BusinessesConfig tb_BusinessesConfig[]
+}
+
+model tb_BusinessesConfig {
+  BusinessConfigId     Int                   @id @default(autoincrement())
+  BusinessId           Int?
+  ConfigKey            String?               @db.VarChar(100)
+  ConfigValue          String?               @db.VarChar(1000)
+  tb_BusinessesCatalog tb_BusinessesCatalog? @relation(fields: [BusinessId], references: [BusinessId], onDelete: NoAction, onUpdate: NoAction, map: "tb_BusinessesConfig_ibfk_1")
+
+  @@index([BusinessId], map: "BusinessId")
 }

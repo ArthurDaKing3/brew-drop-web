@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { getTenantFromRequest } from '@/utils/utilites';
 
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error']
@@ -7,10 +8,18 @@ const prisma = new PrismaClient({
 export default async function handler(req, res){
     if(req.method == 'POST'){
         try{
-            const { type, items } = req.body;
 
-            console.log(type);
-            console.log(items);
+            const tenant = getTenantFromRequest(req);
+
+            const businessId = await prisma.tb_BusinessesCatalog.findFirst({
+                where: { Subdomain: tenant }
+            });
+
+            if (!businessId) {
+                return res.status(404).json({ error: "Business not found" });
+            }
+
+            const { type, items } = req.body;
 
             const data = {};
             switch(type){
@@ -39,6 +48,8 @@ export default async function handler(req, res){
                         return res.status(400).json({ error: "No valid fields to update" });
                     }
 
+                    data.BusinessId = businessId.BusinessId;
+
                     await prisma.drink.create({
                         data
                     });
@@ -51,6 +62,8 @@ export default async function handler(req, res){
                     if (Object.keys(data).length === 0) {
                         return res.status(400).json({ error: "No valid fields to update" });
                     }
+
+                    data.BusinessId = businessId.BusinessId;
 
                     await prisma.category.create({
                         data,
@@ -65,6 +78,8 @@ export default async function handler(req, res){
                         return res.status(400).json({ error: "No valid fields to update" });
                     }
 
+                    data.BusinessId = businessId.BusinessId;
+
                     await prisma.discount.create({
                         data,
                     });
@@ -74,6 +89,7 @@ export default async function handler(req, res){
                     return res.status(400).json({ error: "Invalid type provided" });
             }
         }catch(error){
+            console.log(error);
             res.status(500).json({ message: error.message });
         }finally{
             await prisma.$disconnect();

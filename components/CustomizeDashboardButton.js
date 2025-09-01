@@ -1,11 +1,10 @@
 import ChartList from "@/components/ChartList";
 import { showSwalWithComponent } from "@/hooks/useSweetAlert";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen, faChartPie, faChartLine, faChartSimple, faGaugeHigh } from '@fortawesome/free-solid-svg-icons'
+import { faPen } from '@fortawesome/free-solid-svg-icons'
 import { useEffect, useState, useRef } from "react";
 import { ChartContext } from '@/context/ChartContext';
 import { useChartContext } from "@/hooks/useChartContext";
-import { useTenantContext } from "@/hooks/useTenantContext";
 import ChartsCatalog from "@/config/charts/ChartsCatalog";
 
 
@@ -24,8 +23,6 @@ const CustomizeDashboardButton = () => {
                             .sort((a, b) => a.order - b.order);
 
     const [contextCharts, setContextCharts] = useState(initialCharts);
-
-    const { tenant } = useTenantContext();
 
     useEffect(() => {
 
@@ -47,15 +44,10 @@ const CustomizeDashboardButton = () => {
                 return section;
             });
 
-            const reqBody = {
-                layout: newLayout,
-                tenant: tenant,
-            };
-
             // HTTP Request to update the layout
             try{
 
-                const response  = await fetch("/api/activity", {method: "PUT", body: JSON.stringify(reqBody)});
+                const response  = await fetch("/api/activity", {method: "PUT", body: JSON.stringify(newLayout)});
                 const result    = await response.json();
 
                 if (!response.ok) throw new Error(result.message || "Unknown error");
@@ -90,6 +82,8 @@ const CustomizeDashboardButton = () => {
                 title: "Personalizar Dashboard",
                 showCancelButton: false,
                 showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
             },
         );
 
